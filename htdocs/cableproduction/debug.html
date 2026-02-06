@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Debug API</title>
+</head>
+<body>
+    <h1>Проверка API</h1>
+    
+    <div id="results"></div>
+    
+    <script>
+        const API_BASE = 'backend/api/';
+        
+        async function testAPI() {
+            const results = document.getElementById('results');
+            results.innerHTML = '<p>Тестируем API...</p>';
+            
+            try {
+                // Тест health.php
+                const healthResponse = await fetch(API_BASE + 'health.php');
+                const healthText = await healthResponse.text();
+                results.innerHTML += `<h3>health.php:</h3><pre>${healthText}</pre>`;
+                
+                // Тест manufacturers.php
+                const manResponse = await fetch(API_BASE + 'manufacturers.php');
+                const manText = await manResponse.text();
+                results.innerHTML += `<h3>manufacturers.php:</h3><pre>${manText}</pre>`;
+                
+                // Тест products.php
+                const prodResponse = await fetch(API_BASE + 'products.php');
+                const prodText = await prodResponse.text();
+                results.innerHTML += `<h3>products.php:</h3><pre>${prodText}</pre>`;
+                
+            } catch (error) {
+                results.innerHTML += `<p style="color:red">Ошибка: ${error.message}</p>`;
+            }
+        }
+        
+        testAPI();
+    </script>
+</body>
+</html>

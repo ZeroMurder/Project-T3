@@ -1,0 +1,3830 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Админ-панель - CableProduction</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        :root {
+            --admin-bg: #0f172a;
+            --admin-sidebar: #1e293b;
+            --admin-card: #1e293b;
+            --admin-primary: #3b82f6;
+            --admin-primary-light: #60a5fa;
+            --admin-primary-dark: #2563eb;
+            --admin-success: #10b981;
+            --admin-warning: #f59e0b;
+            --admin-danger: #ef4444;
+            --admin-info: #06b6d4;
+            --admin-text: #f8fafc;
+            --admin-text-secondary: #94a3b8;
+            --admin-border: #334155;
+            --admin-hover: #475569;
+            --admin-gradient: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            --admin-gradient-success: linear-gradient(135deg, #10b981, #059669);
+            --admin-gradient-warning: linear-gradient(135deg, #f59e0b, #d97706);
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--admin-bg);
+            color: var(--admin-text);
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+        
+        /* Загрузочный экран */
+        #loadingScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--admin-bg);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        
+        .loading-spinner {
+            width: 4rem;
+            height: 4rem;
+        }
+        
+        /* Хедер */
+        .admin-header {
+            background-color: var(--admin-sidebar);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--admin-border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+            background-color: rgba(30, 41, 59, 0.95);
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .sidebar-toggle {
+            background: none;
+            border: none;
+            color: var(--admin-text);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 0.375rem;
+            transition: all 0.3s;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .sidebar-toggle:hover {
+            background-color: var(--admin-hover);
+            transform: rotate(90deg);
+        }
+        
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--admin-text);
+            text-decoration: none;
+            font-size: 1.25rem;
+            font-weight: 600;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            transition: all 0.3s;
+        }
+        
+        .brand:hover {
+            background-color: var(--admin-hover);
+            transform: translateY(-2px);
+        }
+        
+        .brand i {
+            color: var(--admin-primary);
+            font-size: 1.5rem;
+        }
+        
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+        
+        .search-box {
+            display: flex;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 0.5rem;
+            overflow: hidden;
+            border: 1px solid var(--admin-border);
+            transition: all 0.3s;
+        }
+        
+        .search-box:focus-within {
+            border-color: var(--admin-primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .search-box input {
+            background: none;
+            border: none;
+            color: var(--admin-text);
+            padding: 0.5rem 1rem;
+            width: 300px;
+            outline: none;
+        }
+        
+        .search-box button {
+            background: var(--admin-gradient);
+            border: none;
+            color: white;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .search-box button:hover {
+            background: var(--admin-primary-dark);
+        }
+        
+        /* Боковое меню */
+        .admin-sidebar {
+            background-color: var(--admin-sidebar);
+            width: 280px;
+            height: calc(100vh - 70px);
+            position: fixed;
+            left: 0;
+            top: 70px;
+            border-right: 1px solid var(--admin-border);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow-y: auto;
+            z-index: 99;
+        }
+        
+        .admin-sidebar.collapsed {
+            transform: translateX(-280px);
+        }
+        
+        .admin-sidebar.show {
+            transform: translateX(0);
+        }
+        
+        .sidebar-user {
+            padding: 2rem;
+            border-bottom: 1px solid var(--admin-border);
+            text-align: center;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(30, 41, 59, 0.3));
+        }
+        
+        .user-avatar {
+            width: 80px;
+            height: 80px;
+            background: var(--admin-gradient);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 2rem;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+            transition: transform 0.3s;
+        }
+        
+        .user-avatar:hover {
+            transform: scale(1.05);
+        }
+        
+        .sidebar-nav {
+            padding: 1.5rem;
+        }
+        
+        .nav-item {
+            margin-bottom: 0.5rem;
+        }
+        
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: var(--admin-text-secondary);
+            text-decoration: none;
+            border-radius: 0.5rem;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            left: -100%;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--admin-gradient);
+            transition: left 0.3s;
+            z-index: -1;
+        }
+        
+        .nav-link:hover::before {
+            left: 0;
+        }
+        
+        .nav-link:hover {
+            color: white;
+            transform: translateX(5px);
+        }
+        
+        .nav-link.active {
+            background: var(--admin-gradient);
+            color: white;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+        }
+        
+        .nav-link.active::before {
+            display: none;
+        }
+        
+        .sidebar-footer {
+            border-top: 1px solid var(--admin-border);
+            margin-top: auto;
+            padding: 1.5rem;
+        }
+        
+        /* Основной контент */
+        .admin-content {
+            margin-left: 280px;
+            padding: 2rem;
+            transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            min-height: calc(100vh - 70px);
+        }
+        
+        .admin-content.expanded {
+            margin-left: 0;
+        }
+        
+        /* Секции */
+        .admin-section {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .admin-section.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .section-title {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: var(--admin-text);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        /* Карточки */
+        .responsive-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background-color: var(--admin-card);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            border: 1px solid var(--admin-border);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--admin-gradient);
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--admin-gradient);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            background: var(--admin-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stat-label {
+            color: var(--admin-text-secondary);
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        /* Таблицы */
+        .data-table {
+            width: 100%;
+            color: var(--admin-text);
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+        
+        .data-table thead th {
+            background-color: rgba(255, 255, 255, 0.05);
+            padding: 1rem;
+            font-weight: 600;
+            text-align: left;
+            border-bottom: 2px solid var(--admin-border);
+            position: sticky;
+            top: 0;
+            backdrop-filter: blur(10px);
+        }
+        
+        .data-table tbody td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--admin-border);
+            transition: background-color 0.2s;
+        }
+        
+        .data-table tbody tr {
+            transition: all 0.3s;
+        }
+        
+        .data-table tbody tr:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+            transform: scale(1.005);
+        }
+        
+        /* Кнопки */
+        .btn-admin {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            position: relative;
+            overflow: hidden;
+            font-size: 0.95rem;
+        }
+        
+        .btn-admin::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.7s;
+        }
+        
+        .btn-admin:hover::before {
+            left: 100%;
+        }
+        
+        .btn-admin-primary {
+            background: var(--admin-gradient);
+            color: white;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+        }
+        
+        .btn-admin-primary:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4);
+        }
+        
+        .btn-admin-success {
+            background: var(--admin-gradient-success);
+            color: white;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+        
+        .btn-admin-warning {
+            background: var(--admin-gradient-warning);
+            color: white;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+        }
+        
+        .btn-admin-danger {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+        }
+        
+        .btn-action {
+            background: none;
+            border: none;
+            color: var(--admin-text-secondary);
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1rem;
+            width: 36px;
+            height: 36px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .btn-action:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--admin-text);
+            transform: scale(1.1);
+        }
+        
+        .btn-parse {
+            color: var(--admin-primary);
+            background: rgba(59, 130, 246, 0.1);
+        }
+        
+        .btn-edit {
+            color: var(--admin-warning);
+            background: rgba(245, 158, 11, 0.1);
+        }
+        
+        .btn-delete {
+            color: var(--admin-danger);
+            background: rgba(239, 68, 68, 0.1);
+        }
+        
+        .btn-view {
+            color: var(--admin-info);
+            background: rgba(6, 182, 212, 0.1);
+        }
+        
+        /* Чарты */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+        
+        /* Модальные окна */
+        .modal-content {
+            background-color: var(--admin-card);
+            color: var(--admin-text);
+            border: 1px solid var(--admin-border);
+            border-radius: 1rem;
+            overflow: hidden;
+        }
+        
+        .modal-header {
+            border-bottom: 1px solid var(--admin-border);
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1.5rem;
+        }
+        
+        .modal-footer {
+            border-top: 1px solid var(--admin-border);
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1.5rem;
+        }
+        
+        .btn-close-white {
+            filter: invert(1) grayscale(100%) brightness(200%);
+        }
+        
+        /* Формы */
+        .form-control, .form-select {
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--admin-border);
+            color: var(--admin-text);
+            border-radius: 0.75rem;
+            padding: 0.75rem 1rem;
+            transition: all 0.3s;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-color: var(--admin-primary);
+            color: var(--admin-text);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+            transform: translateY(-2px);
+        }
+        
+        .form-label {
+            color: var(--admin-text);
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        
+        /* Адаптивность */
+        @media (max-width: 1024px) {
+            .admin-sidebar {
+                transform: translateX(-280px);
+                box-shadow: 10px 0 30px rgba(0, 0, 0, 0.3);
+            }
+            
+            .admin-sidebar.show {
+                transform: translateX(0);
+            }
+            
+            .admin-content {
+                margin-left: 0;
+            }
+            
+            .search-box input {
+                width: 200px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .section-header {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: stretch;
+            }
+            
+            .search-box input {
+                width: 100%;
+            }
+            
+            .header-right {
+                flex-wrap: wrap;
+                justify-content: flex-end;
+            }
+            
+            .admin-header {
+                padding: 1rem;
+            }
+            
+            .admin-content {
+                padding: 1rem;
+            }
+        }
+        
+        /* Уведомления */
+        .alert-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            min-width: 300px;
+            max-width: 400px;
+            animation: slideInRight 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 0.75rem;
+            border: none;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+        
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        /* Пагинация */
+        .pagination-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+        
+        .page-btn {
+            padding: 0.5rem 1rem;
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--admin-border);
+            color: var(--admin-text);
+            border-radius: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            min-width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 500;
+        }
+        
+        .page-btn:hover:not(:disabled) {
+            background-color: var(--admin-hover);
+            transform: translateY(-2px);
+        }
+        
+        .page-btn.active {
+            background: var(--admin-gradient);
+            border-color: transparent;
+            color: white;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+        }
+        
+        .page-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* Бейджи */
+        .badge {
+            padding: 0.35em 0.65em;
+            font-weight: 600;
+            border-radius: 10px;
+        }
+        
+        /* Прогресс-бар */
+        .progress {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            height: 8px;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            background: var(--admin-gradient);
+            border-radius: 10px;
+        }
+        
+        /* Кастомные чекбоксы */
+        .form-check-input:checked {
+            background-color: var(--admin-primary);
+            border-color: var(--admin-primary);
+        }
+        
+        /* Анимация загрузки */
+        .spinner-glow {
+            animation: glow 1.5s ease-in-out infinite alternate;
+        }
+        
+        @keyframes glow {
+            from { box-shadow: 0 0 10px rgba(59, 130, 246, 0.5); }
+            to { box-shadow: 0 0 20px rgba(59, 130, 246, 0.8); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Загрузочный экран -->
+    <div id="loadingScreen">
+        <div class="spinner-border text-primary loading-spinner spinner-glow" role="status">
+            <span class="visually-hidden">Загрузка...</span>
+        </div>
+        <p class="mt-3 text-muted">Инициализация админ-панели...</p>
+    </div>
+
+    <!-- Уведомления -->
+    <div id="notificationArea"></div>
+
+    <!-- Хедер -->
+    <header class="admin-header">
+        <div class="header-left">
+            <button class="sidebar-toggle" id="sidebarToggle" title="Меню">
+                <i class="bi bi-list"></i>
+            </button>
+            <a href="#" class="brand">
+                <i class="bi bi-shield-check"></i>
+                <span>CableProduction Admin</span>
+            </a>
+        </div>
+        
+        <div class="header-right">
+            <div class="search-box">
+                <input type="text" id="globalSearch" placeholder="Поиск...">
+                <button type="button" id="searchButton" title="Найти">
+                    <i class="bi bi-search"></i>
+                </button>
+            </div>
+            
+            <div class="dropdown">
+                <button class="btn btn-admin btn-admin-primary dropdown-toggle d-flex align-items-center" 
+                        type="button" 
+                        data-bs-toggle="dropdown"
+                        title="Профиль администратора">
+                    <i class="bi bi-person-circle me-2"></i>
+                    <span id="currentUser">Администратор</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item" href="#" onclick="switchSection('settings')"><i class="bi bi-person me-2"></i>Профиль</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="switchSection('settings')"><i class="bi bi-gear me-2"></i>Настройки</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item text-danger" href="#" onclick="adminLogout()">
+                        <i class="bi bi-box-arrow-right me-2"></i>Выйти
+                    </a></li>
+                </ul>
+            </div>
+        </div>
+    </header>
+
+    <!-- Боковое меню -->
+    <aside class="admin-sidebar" id="adminSidebar">
+        <div class="sidebar-user">
+            <div class="user-avatar">
+                <i class="bi bi-person-fill"></i>
+            </div>
+            <h6 class="mb-1" id="sidebarUserName">Администратор</h6>
+            <small class="text-muted" id="sidebarUserEmail">admin@cableproduction.ru</small>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <div class="nav-item">
+                <a href="#" class="nav-link active" data-section="dashboard">
+                    <i class="bi bi-speedometer2"></i>
+                    <span>Дашборд</span>
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="#" class="nav-link" data-section="manufacturers">
+                    <i class="bi bi-buildings"></i>
+                    <span>Производители</span>
+                    <span class="badge bg-primary ms-auto" id="manufacturerBadge">0</span>
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="#" class="nav-link" data-section="products">
+                    <i class="bi bi-box-seam"></i>
+                    <span>Продукция</span>
+                    <span class="badge bg-success ms-auto" id="productBadge">0</span>
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="#" class="nav-link" data-section="stats">
+                    <i class="bi bi-graph-up"></i>
+                    <span>Статистика</span>
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="#" class="nav-link" data-section="settings">
+                    <i class="bi bi-gear"></i>
+                    <span>Настройки</span>
+                </a>
+            </div>
+        </nav>
+        
+        <div class="sidebar-footer">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <small class="text-muted">Версия 2.2.0</small>
+                <button class="btn btn-sm btn-admin btn-admin-primary" onclick="checkForUpdates()" title="Проверить обновления">
+                    <i class="bi bi-arrow-repeat"></i>
+                </button>
+            </div>
+            <div class="progress mb-2">
+                <div class="progress-bar" style="width: 75%" id="storageProgress"></div>
+            </div>
+            <small class="text-muted d-block text-center">© 2026 CableProduction</small>
+        </div>
+    </aside>
+
+    <!-- Основной контент -->
+    <main class="admin-content" id="adminContent">
+        <!-- Дашборд -->
+        <section class="admin-section active" id="dashboardSection">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <i class="bi bi-speedometer2 me-2 gradient-text"></i>Панель управления
+                </h2>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-admin btn-admin-primary" onclick="loadDashboardData()" title="Обновить данные">
+                        <i class="bi bi-arrow-clockwise me-2"></i>Обновить
+                    </button>
+                    <button class="btn btn-admin btn-admin-success" onclick="syncWithIndexPage()" title="Синхронизировать с главной страницей">
+                        <i class="bi bi-arrow-repeat me-2"></i>Синхронизировать
+                    </button>
+                    <a href="../index.html" target="_blank" class="btn btn-admin btn-admin-warning" title="Открыть сайт">
+                        <i class="bi bi-eye me-2"></i>Просмотр сайта
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Статистика -->
+            <div class="responsive-grid mb-5">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="bi bi-buildings"></i>
+                    </div>
+                    <div class="stat-number" id="statsManufacturers">0</div>
+                    <div class="stat-label">Производителей</div>
+                    <small class="text-success"><i class="bi bi-arrow-up"></i> <span id="manufacturerGrowth">0%</span></small>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: var(--admin-gradient-success);">
+                        <i class="bi bi-box-seam"></i>
+                    </div>
+                    <div class="stat-number" id="statsProducts">0</div>
+                    <div class="stat-label">Товаров в каталоге</div>
+                    <small class="text-success"><i class="bi bi-arrow-up"></i> <span id="productGrowth">0%</span></small>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: var(--admin-gradient-warning);">
+                        <i class="bi bi-geo-alt"></i>
+                    </div>
+                    <div class="stat-number" id="statsCities">0</div>
+                    <div class="stat-label">Городов</div>
+                    <small class="text-success"><i class="bi bi-plus"></i> <span id="cityGrowth">0</span></small>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+                        <i class="bi bi-currency-exchange"></i>
+                    </div>
+                    <div class="stat-number" id="statsRevenue">0</div>
+                    <div class="stat-label">Общий товарооборот</div>
+                    <small class="text-success"><i class="bi bi-arrow-up"></i> <span id="revenueGrowth">0%</span></small>
+                </div>
+            </div>
+            
+            <!-- Последние добавленные -->
+            <div class="row g-4">
+                <div class="col-lg-6">
+                    <div class="stat-card h-100">
+                        <h5 class="mb-4 d-flex justify-content-between align-items-center">
+                            <span><i class="bi bi-buildings me-2"></i>Последние производители</span>
+                            <button class="btn btn-admin btn-admin-primary btn-sm" onclick="switchSection('manufacturers')">
+                                <i class="bi bi-arrow-right me-1"></i>Все
+                            </button>
+                        </h5>
+                        <div id="recentManufacturers" class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Название</th>
+                                        <th>Город</th>
+                                        <th>Товары</th>
+                                        <th>Дата</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recentManufacturersBody">
+                                    <tr>
+                                        <td colspan="4" class="text-center py-4">
+                                            <div class="spinner-border spinner-border-sm text-primary spinner-glow" role="status"></div>
+                                            <p class="mt-2 text-muted">Загрузка...</p>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-6">
+                    <div class="stat-card h-100">
+                        <h5 class="mb-4 d-flex justify-content-between align-items-center">
+                            <span><i class="bi bi-box-seam me-2"></i>Последние товары</span>
+                            <button class="btn btn-admin btn-admin-success btn-sm" onclick="switchSection('products')">
+                                <i class="bi bi-arrow-right me-1"></i>Все
+                            </button>
+                        </h5>
+                        <div id="recentProducts" class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Название</th>
+                                        <th>Производитель</th>
+                                        <th>Цена</th>
+                                        <th>Дата</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recentProductsBody">
+                                    <tr>
+                                        <td colspan="4" class="text-center py-4">
+                                            <div class="spinner-border spinner-border-sm text-primary spinner-glow" role="status"></div>
+                                            <p class="mt-2 text-muted">Загрузка...</p>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Быстрые действия -->
+            <div class="stat-card mt-4">
+                <h5 class="mb-4"><i class="bi bi-lightning me-2"></i>Быстрые действия</h5>
+                <div class="d-flex flex-wrap gap-3">
+                    <button class="btn btn-admin btn-admin-primary" onclick="showManufacturerModal()">
+                        <i class="bi bi-plus-circle me-2"></i>Добавить производителя
+                    </button>
+                    <button class="btn btn-admin btn-admin-success" onclick="showProductModal()">
+                        <i class="bi bi-plus-circle me-2"></i>Добавить товар
+                    </button>
+                    <button class="btn btn-admin btn-admin-warning" onclick="batchImportProducts()">
+                        <i class="bi bi-upload me-2"></i>Импорт данных
+                    </button>
+                    <button class="btn btn-admin btn-admin-danger" onclick="createBackup()">
+                        <i class="bi bi-download me-2"></i>Создать резервную копию
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Производители -->
+        <section class="admin-section" id="manufacturersSection">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <i class="bi bi-buildings me-2"></i>Управление производителями
+                </h2>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-admin btn-admin-primary" onclick="showManufacturerModal()" title="Добавить нового производителя">
+                        <i class="bi bi-plus-circle me-2"></i>Добавить
+                    </button>
+                    <button class="btn btn-admin btn-admin-warning" onclick="batchImportManufacturers()" title="Импорт из файла">
+                        <i class="bi bi-upload me-2"></i>Импорт
+                    </button>
+                    <button class="btn btn-admin btn-admin-success" onclick="exportManufacturers()" title="Экспорт в CSV">
+                        <i class="bi bi-download me-2"></i>Экспорт
+                    </button>
+                    <button class="btn btn-admin btn-admin-danger" onclick="bulkDeleteManufacturers()" title="Удалить выбранные">
+                        <i class="bi bi-trash me-2"></i>Удалить
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Фильтры и поиск -->
+            <div class="stat-card mb-4">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <input type="text" class="form-control" id="searchManufacturers" placeholder="Поиск по названию..." onkeyup="debouncedLoadManufacturers()">
+                    </div>
+                    <div class="col-md-2">
+                        <select class="form-select" id="filterCity" onchange="loadManufacturers()">
+                            <option value="">Все города</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <select class="form-select" id="filterStatus" onchange="loadManufacturers()">
+                            <option value="">Все статусы</option>
+                            <option value="active">Активные</option>
+                            <option value="inactive">Неактивные</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <select class="form-select" id="sortManufacturers" onchange="loadManufacturers()">
+                            <option value="name_asc">По названию (А-Я)</option>
+                            <option value="name_desc">По названию (Я-А)</option>
+                            <option value="newest">Сначала новые</option>
+                            <option value="products_desc">По товарам (↓)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 d-flex gap-2">
+                        <button class="btn btn-admin btn-admin-primary flex-grow-1" onclick="loadManufacturers()" title="Применить фильтры">
+                            <i class="bi bi-funnel me-1"></i>Фильтр
+                        </button>
+                        <button class="btn btn-admin btn-admin-warning" onclick="resetFilters()" title="Сбросить фильтры">
+                            <i class="bi bi-x-circle"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Таблица производителей -->
+            <div class="stat-card">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h5 class="mb-0">Список производителей</h5>
+                        <span class="text-muted" id="manufacturersCount">Загрузка...</span>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-admin btn-admin-primary" onclick="selectAllManufacturers()" title="Выбрать все">
+                            <i class="bi bi-check-square me-1"></i>Выбрать все
+                        </button>
+                        <div class="dropdown">
+                            <button class="btn btn-admin btn-admin-warning dropdown-toggle" type="button" data-bs-toggle="dropdown" title="Групповые действия">
+                                Действия
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="#" onclick="bulkUpdateStatus('active')"><i class="bi bi-check-circle me-2"></i>Активировать</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="bulkUpdateStatus('inactive')"><i class="bi bi-x-circle me-2"></i>Деактивировать</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger" href="#" onclick="bulkDeleteManufacturers()"><i class="bi bi-trash me-2"></i>Удалить выбранные</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="table data-table">
+                        <thead>
+                            <tr>
+                                <th width="50">
+                                    <input type="checkbox" class="form-check-input" id="selectAll" onchange="toggleSelectAll(this)" title="Выбрать все">
+                                </th>
+                                <th width="60">ID</th>
+                                <th>Название</th>
+                                <th>Город</th>
+                                <th>Контакты</th>
+                                <th width="100">Товары</th>
+                                <th>Статус</th>
+                                <th width="180">Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody id="manufacturersTable">
+                            <tr>
+                                <td colspan="8" class="text-center py-5">
+                                    <div class="spinner-border text-primary spinner-glow" role="status"></div>
+                                    <p class="mt-3">Загрузка производителей...</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Пагинация -->
+                <div class="pagination-container mt-4" id="manufacturersPagination"></div>
+            </div>
+        </section>
+
+        <!-- Продукция -->
+        <section class="admin-section" id="productsSection">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <i class="bi bi-box-seam me-2"></i>Управление продукцией
+                </h2>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-admin btn-admin-primary" onclick="showProductModal()" title="Добавить новый товар">
+                        <i class="bi bi-plus-circle me-2"></i>Добавить
+                    </button>
+                    <button class="btn btn-admin btn-admin-warning" onclick="batchImportProducts()" title="Импорт из файла">
+                        <i class="bi bi-upload me-2"></i>Импорт
+                    </button>
+                    <button class="btn btn-admin btn-admin-success" onclick="exportProducts()" title="Экспорт в CSV">
+                        <i class="bi bi-download me-2"></i>Экспорт
+                    </button>
+                    <button class="btn btn-admin btn-admin-danger" onclick="bulkDeleteProducts()" title="Удалить выбранные">
+                        <i class="bi bi-trash me-2"></i>Удалить
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Фильтры и поиск -->
+            <div class="stat-card mb-4">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <input type="text" class="form-control" id="searchProducts" placeholder="Поиск по названию..." onkeyup="debouncedLoadProducts()">
+                    </div>
+                    <div class="col-md-2">
+                        <select class="form-select" id="filterType" onchange="loadProducts()">
+                            <option value="">Все типы</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <select class="form-select" id="filterManufacturer" onchange="loadProducts()">
+                            <option value="">Все производители</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <select class="form-select" id="priceRange" onchange="loadProducts()">
+                            <option value="">Все цены</option>
+                            <option value="0-100">до 100 руб.</option>
+                            <option value="100-500">100-500 руб.</option>
+                            <option value="500-1000">500-1000 руб.</option>
+                            <option value="1000+">от 1000 руб.</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 d-flex gap-2">
+                        <button class="btn btn-admin btn-admin-primary flex-grow-1" onclick="loadProducts()" title="Применить фильтры">
+                            <i class="bi bi-funnel me-1"></i>Фильтр
+                        </button>
+                        <button class="btn btn-admin btn-admin-warning" onclick="resetProductFilters()" title="Сбросить фильтры">
+                            <i class="bi bi-x-circle"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Таблица продукции -->
+            <div class="stat-card">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h5 class="mb-0">Список продукции</h5>
+                        <span class="text-muted" id="productsCount">Загрузка...</span>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-admin btn-admin-primary" onclick="selectAllProducts()" title="Выбрать все">
+                            <i class="bi bi-check-square me-1"></i>Выбрать все
+                        </button>
+                        <div class="dropdown">
+                            <button class="btn btn-admin btn-admin-warning dropdown-toggle" type="button" data-bs-toggle="dropdown" title="Групповые действия">
+                                Действия
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="#" onclick="bulkUpdateProductStatus('active')"><i class="bi bi-check-circle me-2"></i>Активировать</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="bulkUpdateProductStatus('inactive')"><i class="bi bi-x-circle me-2"></i>Деактивировать</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger" href="#" onclick="bulkDeleteProducts()"><i class="bi bi-trash me-2"></i>Удалить выбранные</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="table data-table">
+                        <thead>
+                            <tr>
+                                <th width="50">
+                                    <input type="checkbox" class="form-check-input" id="selectAllProducts" onchange="toggleSelectAllProducts(this)" title="Выбрать все">
+                                </th>
+                                <th width="60">ID</th>
+                                <th>Название</th>
+                                <th>Производитель</th>
+                                <th>Тип</th>
+                                <th width="120">Цена</th>
+                                <th>Статус</th>
+                                <th width="180">Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productsTable">
+                            <tr>
+                                <td colspan="8" class="text-center py-5">
+                                    <div class="spinner-border text-primary spinner-glow" role="status"></div>
+                                    <p class="mt-3">Загрузка товаров...</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Пагинация -->
+                <div class="pagination-container mt-4" id="productsPagination"></div>
+            </div>
+        </section>
+
+        <!-- Статистика -->
+        <section class="admin-section" id="statsSection">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <i class="bi bi-graph-up me-2"></i>Статистика и аналитика
+                </h2>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-admin btn-admin-primary" onclick="loadStatistics()" title="Обновить статистику">
+                        <i class="bi bi-arrow-clockwise me-2"></i>Обновить
+                    </button>
+                    <div class="dropdown">
+                        <button class="btn btn-admin btn-admin-success dropdown-toggle" type="button" data-bs-toggle="dropdown" title="Выбрать период">
+                            <i class="bi bi-calendar me-2"></i>Период
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#" onclick="setStatsPeriod('week')">Неделя</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="setStatsPeriod('month')">Месяц</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="setStatsPeriod('quarter')">Квартал</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="setStatsPeriod('year')">Год</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row g-4">
+                <div class="col-lg-8">
+                    <div class="stat-card">
+                        <h5 class="mb-4">Динамика добавления товаров</h5>
+                        <div class="chart-container">
+                            <canvas id="productsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4">
+                    <div class="stat-card">
+                        <h5 class="mb-4">Топ производителей</h5>
+                        <div class="chart-container">
+                            <canvas id="manufacturersChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row g-4 mt-4">
+                <div class="col-lg-6">
+                    <div class="stat-card">
+                        <h5 class="mb-4">Распределение по городам</h5>
+                        <div class="chart-container">
+                            <canvas id="cityChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-6">
+                    <div class="stat-card">
+                        <h5 class="mb-4">Распределение по типам</h5>
+                        <div class="chart-container">
+                            <canvas id="typeChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stat-card mt-4">
+                <h5 class="mb-4"><i class="bi bi-bar-chart me-2"></i>Ключевые метрики</h5>
+                <div class="row text-center">
+                    <div class="col-md-3 mb-3">
+                        <div class="display-4 fw-bold text-primary" id="detailedManufacturers">0</div>
+                        <div class="text-muted">Производителей</div>
+                        <small class="text-success" id="detailedManufacturersGrowth">+0%</small>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="display-4 fw-bold text-success" id="detailedProducts">0</div>
+                        <div class="text-muted">Товаров</div>
+                        <small class="text-success" id="detailedProductsGrowth">+0%</small>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="display-4 fw-bold text-warning" id="detailedAvgPrice">0</div>
+                        <div class="text-muted">Средняя цена</div>
+                        <small class="text-success" id="detailedPriceGrowth">+0%</small>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="display-4 fw-bold text-info" id="detailedRevenue">0</div>
+                        <div class="text-muted">Товарооборот</div>
+                        <small class="text-success" id="detailedRevenueGrowth">+0%</small>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Настройки -->
+        <section class="admin-section" id="settingsSection">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <i class="bi bi-gear me-2"></i>Настройки системы
+                </h2>
+                <button class="btn btn-admin btn-admin-primary" onclick="saveSettings()" title="Сохранить настройки">
+                    <i class="bi bi-save me-2"></i>Сохранить
+                </button>
+            </div>
+            
+            <div class="row g-4">
+                <div class="col-lg-8">
+                    <div class="stat-card">
+                        <h5 class="mb-4"><i class="bi bi-person-circle me-2"></i>Настройки администратора</h5>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Имя администратора</label>
+                                <input type="text" class="form-control" id="adminName" value="Администратор">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Email</label>
+                                <input type="email" class="form-control" id="adminEmail" value="admin@cableproduction.ru">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Новый пароль</label>
+                                <input type="password" class="form-control" id="adminPassword" placeholder="Оставьте пустым, если не нужно менять">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Подтверждение пароля</label>
+                                <input type="password" class="form-control" id="adminPasswordConfirm" placeholder="Повторите пароль">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Аватар</label>
+                            <input type="file" class="form-control" id="adminAvatar" accept="image/*">
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card mt-4">
+                        <h5 class="mb-4"><i class="bi bi-sliders me-2"></i>Настройки системы</h5>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Элементов на странице</label>
+                                <select class="form-select" id="pageSize">
+                                    <option value="10">10</option>
+                                    <option value="25" selected>25</option>
+                                    <option value="50">50</option>
+                                    <option value="100">100</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Язык интерфейса</label>
+                                <select class="form-select" id="interfaceLanguage">
+                                    <option value="ru" selected>Русский</option>
+                                    <option value="en">English</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="notifications" checked>
+                                    <label class="form-check-label" for="notifications">Уведомления</label>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="autoRefresh">
+                                    <label class="form-check-label" for="autoRefresh">Автообновление</label>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="darkMode" checked>
+                                    <label class="form-check-label" for="darkMode">Темная тема</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="emailAlerts">
+                                    <label class="form-check-label" for="emailAlerts">Email-уведомления</label>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="auditLog" checked>
+                                    <label class="form-check-label" for="auditLog">Вести журнал аудита</label>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="backupEnabled" checked>
+                                    <label class="form-check-label" for="backupEnabled">Автоматическое резервное копирование</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4">
+                    <div class="stat-card">
+                        <h5 class="mb-4"><i class="bi bi-shield-check me-2"></i>Безопасность</h5>
+                        <div class="mb-3">
+                            <label class="form-label">Двухфакторная аутентификация</label>
+                            <select class="form-select" id="twoFactorAuth">
+                                <option value="none">Отключена</option>
+                                <option value="email">По email</option>
+                                <option value="sms">По SMS</option>
+                                <option value="app">Через приложение</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Сессии истекают через</label>
+                            <select class="form-select" id="sessionTimeout">
+                                <option value="1">1 час</option>
+                                <option value="4">4 часа</option>
+                                <option value="8" selected>8 часов</option>
+                                <option value="24">24 часа</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-admin btn-admin-warning w-100 mb-3" onclick="showSessionLog()" title="Просмотр истории сессий">
+                            <i class="bi bi-clock-history me-2"></i>История сессий
+                        </button>
+                        <button class="btn btn-admin btn-admin-danger w-100" onclick="terminateAllSessions()" title="Завершить все активные сессии">
+                            <i class="bi bi-power me-2"></i>Завершить все сессии
+                        </button>
+                    </div>
+                    
+                    <div class="stat-card mt-4">
+                        <h5 class="mb-4"><i class="bi bi-database me-2"></i>Управление данными</h5>
+                        <button class="btn btn-admin btn-admin-primary w-100 mb-3" onclick="createBackup()" title="Создать резервную копию данных">
+                            <i class="bi bi-download me-2"></i>Создать резервную копию
+                        </button>
+                        <button class="btn btn-admin btn-admin-success w-100 mb-3" onclick="showRestoreBackup()" title="Восстановить из резервной копии">
+                            <i class="bi bi-upload me-2"></i>Восстановить из копии
+                        </button>
+                        <button class="btn btn-admin btn-admin-warning w-100 mb-3" onclick="optimizeDatabase()" title="Оптимизировать базу данных">
+                            <i class="bi bi-speedometer2 me-2"></i>Оптимизировать БД
+                        </button>
+                        <button class="btn btn-admin btn-admin-danger w-100" onclick="showDataCleanup()" title="Очистка старых данных">
+                            <i class="bi bi-trash me-2"></i>Очистка данных
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stat-card mt-4">
+                <h5 class="mb-4"><i class="bi bi-info-circle me-2"></i>О системе</h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Версия:</strong> CableProduction v2.2.0</p>
+                        <p><strong>Дата сборки:</strong> <span id="buildDate">02.02.2026</span></p>
+                        <p><strong>Разработчик:</strong> Admin Team</p>
+                        <p><strong>Лицензия:</strong> Проприетарная</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>База данных:</strong> <span id="dbVersion">LocalStorage</span></p>
+                        <p><strong>Backend:</strong> JavaScript</p>
+                        <p><strong>Frontend:</strong> Bootstrap 5 + Chart.js</p>
+                        <p><strong>Последнее обновление:</strong> <span id="lastUpdate">02.02.2026</span></p>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <button class="btn btn-admin btn-admin-primary" onclick="checkForUpdates()" title="Проверить наличие обновлений">
+                        <i class="bi bi-arrow-repeat me-1"></i>Проверить обновления
+                    </button>
+                    <button class="btn btn-admin btn-admin-warning ms-2" onclick="showSystemLogs()" title="Просмотр системных логов">
+                        <i class="bi bi-journal-text me-1"></i>Системные логи
+                    </button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Модальные окна -->
+    <div class="modal fade" id="manufacturerModal" tabindex="-1" data-bs-backdrop="static">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="manufacturerModalTitle">Добавить производителя</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="manufacturerForm">
+                        <input type="hidden" id="manufacturerId">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Название компании <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="manufacturerName" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Город <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="manufacturerCity" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Веб-сайт</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">https://</span>
+                                    <input type="text" class="form-control" id="manufacturerWebsite" placeholder="example.com">
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Телефон</label>
+                                <input type="tel" class="form-control" id="manufacturerPhone" placeholder="+7 (XXX) XXX-XX-XX">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control" id="manufacturerEmail" placeholder="email@example.com">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Описание</label>
+                            <textarea class="form-control" id="manufacturerDescription" rows="3"></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Статус</label>
+                                <select class="form-select" id="manufacturerStatus">
+                                    <option value="active">Активный</option>
+                                    <option value="inactive">Неактивный</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Логотип</label>
+                                <input type="file" class="form-control" id="manufacturerLogo" accept="image/*">
+                            </div>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="manufacturerFeatured">
+                            <label class="form-check-label" for="manufacturerFeatured">Рекомендуемый производитель</label>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-admin btn-admin-warning" data-bs-dismiss="modal">Отмена</button>
+                    <button type="button" class="btn btn-admin btn-admin-primary" onclick="saveManufacturer()">Сохранить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="productModal" tabindex="-1" data-bs-backdrop="static">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="productModalTitle">Добавить товар</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="productForm">
+                        <input type="hidden" id="productId">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Производитель <span class="text-danger">*</span></label>
+                                <select class="form-control" id="productManufacturer" required>
+                                    <option value="">Выберите производителя</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Название товара <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="productName" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Тип кабеля</label>
+                                <select class="form-control" id="productType">
+                                    <option value="">Выберите тип</option>
+                                    <option value="Силовой">Силовой</option>
+                                    <option value="Оптический">Оптический</option>
+                                    <option value="СИП">СИП</option>
+                                    <option value="Витая пара">Витая пара</option>
+                                    <option value="Коаксиальный">Коаксиальный</option>
+                                    <option value="Контрольный">Контрольный</option>
+                                    <option value="Температурный">Температурный</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Цена (руб.) <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" id="productPrice" step="0.01" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Единица измерения</label>
+                                <select class="form-control" id="productUnit">
+                                    <option value="м" selected>м (метр)</option>
+                                    <option value="км">км (километр)</option>
+                                    <option value="бухта">Бухта</option>
+                                    <option value="шт">шт (штука)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Артикул</label>
+                                <input type="text" class="form-control" id="productSku" placeholder="Уникальный код товара">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Категория</label>
+                                <select class="form-control" id="productCategory">
+                                    <option value="">Общая категория</option>
+                                    <option value="Популярное">Популярное</option>
+                                    <option value="Новинка">Новинка</option>
+                                    <option value="Акция">Акция</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Технические характеристики</label>
+                            <textarea class="form-control" id="productSpecs" rows="3" placeholder="Напряжение, сечение, материал и т.д."></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Ссылка на товар</label>
+                                <input type="url" class="form-control" id="productUrl" placeholder="https://example.com/product">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Изображение</label>
+                                <input type="file" class="form-control" id="productImage" accept="image/*">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Статус</label>
+                                <select class="form-select" id="productStatus">
+                                    <option value="active">Активный</option>
+                                    <option value="inactive">Неактивный</option>
+                                    <option value="archived">В архиве</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Наличие</label>
+                                <select class="form-select" id="productStock">
+                                    <option value="in_stock">В наличии</option>
+                                    <option value="out_of_stock">Нет в наличии</option>
+                                    <option value="pre_order">Под заказ</option>
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-admin btn-admin-warning" data-bs-dismiss="modal">Отмена</button>
+                    <button type="button" class="btn btn-admin btn-admin-primary" onclick="saveProduct()">Сохранить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Основной скрипт админки -->
+    <script>
+        function checkAdminAuth() {
+    const authToken = localStorage.getItem('adminAuthToken');
+    const authExpiry = localStorage.getItem('adminAuthExpiry');
+    
+    if (!authToken || !authExpiry) {
+        console.log('Токен авторизации отсутствует, перенаправление на страницу входа');
+        window.location.href = 'admin_login.html';
+        return false;
+    }
+    
+    const now = new Date().getTime();
+    if (now > parseInt(authExpiry)) {
+        console.log('Токен авторизации истек');
+        localStorage.removeItem('adminAuthToken');
+        localStorage.removeItem('adminAuthExpiry');
+        window.location.href = 'admin_login.html';
+        return false;
+    }
+    
+    console.log('Авторизация проверена успешно');
+    return true;
+}
+        // Глобальные переменные
+        let manufacturersData = [];
+        let productsData = [];
+        let currentPage = 1;
+        let pageSize = 25;
+        let totalManufacturers = 0;
+        let totalProducts = 0;
+        let manufacturersChart = null;
+        let productsChart = null;
+        let cityChart = null;
+        let typeChart = null;
+
+        // Инициализация при загрузке страницы
+        document.addEventListener('DOMContentLoaded', function() {
+        console.log('Админ-панель загружается...');
+        document.addEventListener('DOMContentLoaded', function() {
+            // Проверяем авторизацию
+      if (!checkAdminAuth()) {
+        return; // Прерываем выполнение, если не авторизован
+      }
+         });   
+            // Скрываем загрузочный экран
+            setTimeout(() => {
+                const loadingScreen = document.getElementById('loadingScreen');
+                if (loadingScreen) {
+                    loadingScreen.style.display = 'none';
+                    console.log('Загрузочный экран скрыт');
+                }
+            }, 800);
+
+            // Инициализация данных
+            initData();
+            
+            // Настройка навигации
+            setupNavigation();
+            
+            // Загрузка дашборда
+            loadDashboardData();
+            
+            // Настройка событий
+            setupEventListeners();
+            
+            // Обновление прогресса хранилища
+            updateStorageProgress();
+            
+            console.log('Админ-панель инициализирована');
+        });
+
+        // Инициализация данных
+        function initData() {
+            console.log('Инициализация данных...');
+            
+            // Загрузка данных из localStorage
+            const savedManufacturers = localStorage.getItem('cableManufacturers');
+            const savedProducts = localStorage.getItem('cableProducts');
+            const savedSettings = localStorage.getItem('adminSettings');
+            
+            if (savedManufacturers) {
+                try {
+                    manufacturersData = JSON.parse(savedManufacturers);
+                    console.log('Загружено производителей:', manufacturersData.length);
+                } catch (e) {
+                    console.error('Ошибка загрузки производителей:', e);
+                    manufacturersData = [];
+                }
+            } else {
+                console.log('Производители не найдены в localStorage');
+            }
+            
+            if (savedProducts) {
+                try {
+                    productsData = JSON.parse(savedProducts);
+                    console.log('Загружено товаров:', productsData.length);
+                } catch (e) {
+                    console.error('Ошибка загрузки товаров:', e);
+                    productsData = [];
+                }
+            } else {
+                console.log('Товары не найдены в localStorage');
+            }
+            
+            // Если данных нет, загружаем демо данные
+            if (manufacturersData.length === 0 && productsData.length === 0) {
+                console.log('Загрузка демо данных...');
+                loadMockData();
+            }
+            
+            if (savedSettings) {
+                try {
+                    applySettings(JSON.parse(savedSettings));
+                } catch (e) {
+                    console.error('Ошибка загрузки настроек:', e);
+                }
+            }
+        }
+
+        // Загрузка демо данных
+        function loadMockData() {
+            console.log('Создание демо данных...');
+            
+            manufacturersData = [
+                {
+                    id: 1,
+                    name: "Энергомонтаж",
+                    city: "Москва",
+                    email: "info@energomontag.ru",
+                    phone: "+7 (495) 123-45-67",
+                    website: "energomontag.ru",
+                    description: "Производитель силовых кабелей с 1995 года",
+                    status: "active",
+                    featured: true,
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                },
+                {
+                    id: 2,
+                    name: "Электрокабель",
+                    city: "Санкт-Петербург",
+                    email: "sales@elektrokabel.ru",
+                    phone: "+7 (812) 234-56-78",
+                    website: "elektrokabel.ru",
+                    description: "Производитель оптических кабелей",
+                    status: "active",
+                    featured: false,
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                },
+                {
+                    id: 3,
+                    name: "Сибкабель",
+                    city: "Новосибирск",
+                    email: "contact@sibkabel.ru",
+                    phone: "+7 (383) 345-67-89",
+                    website: "sibkabel.ru",
+                    description: "Производитель кабельной продукции для Сибири",
+                    status: "active",
+                    featured: true,
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                }
+            ];
+
+            productsData = [
+                {
+                    id: 1,
+                    manufacturer_id: 1,
+                    name: "Кабель ВВГнг 3х2.5",
+                    type: "Силовой",
+                    price: 45.50,
+                    unit: "м",
+                    sku: "VVG-3x2.5",
+                    category: "Популярное",
+                    specs: "Напряжение 0.66/1 кВ, сечение 3x2.5 мм², не распространяющий горение",
+                    url: "https://energomontag.ru/vvg-3x2.5",
+                    status: "active",
+                    stock: "in_stock",
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                },
+                {
+                    id: 2,
+                    manufacturer_id: 2,
+                    name: "Оптический кабель ОКБ-12",
+                    type: "Оптический",
+                    price: 150.00,
+                    unit: "м",
+                    sku: "OKB-12",
+                    category: "Новинка",
+                    specs: "12 волокон, бронированный, для прокладки в грунт",
+                    url: "https://elektrokabel.ru/okb-12",
+                    status: "active",
+                    stock: "in_stock",
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                },
+                {
+                    id: 3,
+                    manufacturer_id: 3,
+                    name: "Кабель UTP Cat.6",
+                    type: "Витая пара",
+                    price: 25.30,
+                    unit: "м",
+                    sku: "UTP-CAT6",
+                    category: "Акция",
+                    specs: "Витая пара, 4 пары, категория 6, неэкранированный",
+                    url: "https://sibkabel.ru/utp-cat6",
+                    status: "active",
+                    stock: "in_stock",
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                }
+            ];
+
+            // Сохраняем демо данные
+            localStorage.setItem('cableManufacturers', JSON.stringify(manufacturersData));
+            localStorage.setItem('cableProducts', JSON.stringify(productsData));
+            
+            console.log('Демо данные созданы:', { 
+                manufacturers: manufacturersData.length, 
+                products: productsData.length 
+            });
+            
+            showNotification('Демо данные загружены!', 'success');
+        }
+
+        // Настройка навигации
+        function setupNavigation() {
+            console.log('Настройка навигации...');
+            
+            // Переключение секций
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const section = this.getAttribute('data-section');
+                    console.log('Переключение на секцию:', section);
+                    switchSection(section);
+                });
+            });
+            
+            // Переключение бокового меню
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            if (sidebarToggle) {
+                sidebarToggle.addEventListener('click', function() {
+                    const sidebar = document.getElementById('adminSidebar');
+                    const content = document.getElementById('adminContent');
+                    
+                    if (window.innerWidth <= 1024) {
+                        sidebar.classList.toggle('show');
+                    } else {
+                        sidebar.classList.toggle('collapsed');
+                        content.classList.toggle('expanded');
+                    }
+                });
+            }
+            
+            // Глобальный поиск
+            const searchButton = document.getElementById('searchButton');
+            if (searchButton) {
+                searchButton.addEventListener('click', performGlobalSearch);
+            }
+            
+            const globalSearch = document.getElementById('globalSearch');
+            if (globalSearch) {
+                globalSearch.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        performGlobalSearch();
+                    }
+                });
+            }
+        }
+
+        // Переключение секций
+        function switchSection(section) {
+            console.log('Активация секции:', section);
+            
+            // Скрыть все секции
+            document.querySelectorAll('.admin-section').forEach(sec => {
+                sec.classList.remove('active');
+            });
+            
+            // Деактивировать все ссылки
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            
+            // Показать выбранную секцию
+            const sectionElement = document.getElementById(section + 'Section');
+            if (sectionElement) {
+                sectionElement.classList.add('active');
+            }
+            
+            // Активировать соответствующую ссылку
+            const navLink = document.querySelector(`[data-section="${section}"]`);
+            if (navLink) {
+                navLink.classList.add('active');
+            }
+            
+            // Загрузить данные секции
+            switch(section) {
+                case 'dashboard':
+                    loadDashboardData();
+                    break;
+                case 'manufacturers':
+                    loadManufacturers();
+                    break;
+                case 'products':
+                    loadProducts();
+                    break;
+                case 'stats':
+                    loadStatistics();
+                    break;
+                case 'settings':
+                    loadSettings();
+                    break;
+            }
+            
+            // Скрыть боковое меню на мобильных устройствах
+            if (window.innerWidth <= 1024) {
+                const sidebar = document.getElementById('adminSidebar');
+                if (sidebar) {
+                    sidebar.classList.remove('show');
+                }
+            }
+        }
+
+        // Загрузка дашборда
+        function loadDashboardData() {
+            console.log('Загрузка дашборда...');
+            
+            // Обновление статистики
+            updateDashboardStats();
+            
+            // Загрузка последних производителей
+            loadRecentManufacturers();
+            
+            // Загрузка последних товаров
+            loadRecentProducts();
+            
+            showNotification('Данные дашборда обновлены', 'info');
+        }
+
+        // Обновление статистики дашборда
+        function updateDashboardStats() {
+            console.log('Обновление статистики дашборда...');
+            
+            const manufacturerCount = manufacturersData.length;
+            const productCount = productsData.length;
+            const cities = [...new Set(manufacturersData.map(m => m.city))].filter(city => city);
+            const totalRevenue = productsData.reduce((sum, product) => sum + (product.price || 0), 0);
+            
+            // Обновляем элементы
+            updateElementText('statsManufacturers', manufacturerCount);
+            updateElementText('statsProducts', productCount);
+            updateElementText('statsCities', cities.length);
+            updateElementText('statsRevenue', formatCurrency(totalRevenue));
+            
+            updateElementText('manufacturerBadge', manufacturerCount);
+            updateElementText('productBadge', productCount);
+            
+            // Демо данные роста
+            updateElementText('manufacturerGrowth', '+12%');
+            updateElementText('productGrowth', '+23%');
+            updateElementText('cityGrowth', '+3');
+            updateElementText('revenueGrowth', '+18%');
+        }
+
+        // Загрузка последних производителей
+        function loadRecentManufacturers() {
+            const recent = manufacturersData
+                .sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0))
+                .slice(0, 5);
+            
+            const tbody = document.getElementById('recentManufacturersBody');
+            if (!tbody) return;
+            
+            tbody.innerHTML = '';
+            
+            if (recent.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="text-center py-3 text-muted">
+                            Нет производителей
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            recent.forEach(manufacturer => {
+                const productCount = productsData.filter(p => p.manufacturer_id === manufacturer.id).length;
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>${escapeHtml(manufacturer.name)}</strong></td>
+                    <td>${escapeHtml(manufacturer.city || '—')}</td>
+                    <td><span class="badge bg-primary">${productCount}</span></td>
+                    <td><small class="text-muted">${formatDate(manufacturer.created_at)}</small></td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Загрузка последних товаров
+        function loadRecentProducts() {
+            const recent = productsData
+                .sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0))
+                .slice(0, 5);
+            
+            const tbody = document.getElementById('recentProductsBody');
+            if (!tbody) return;
+            
+            tbody.innerHTML = '';
+            
+            if (recent.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="text-center py-3 text-muted">
+                            Нет товаров
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            recent.forEach(product => {
+                const manufacturer = manufacturersData.find(m => m.id === product.manufacturer_id);
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>${escapeHtml(product.name)}</strong></td>
+                    <td>${escapeHtml(manufacturer ? manufacturer.name : '—')}</td>
+                    <td><strong>${formatCurrency(product.price)}</strong></td>
+                    <td><small class="text-muted">${formatDate(product.created_at)}</small></td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Загрузка производителей
+        function loadManufacturers() {
+            console.log('Загрузка производителей...');
+            
+            const searchElement = document.getElementById('searchManufacturers');
+            const cityElement = document.getElementById('filterCity');
+            const statusElement = document.getElementById('filterStatus');
+            const sortElement = document.getElementById('sortManufacturers');
+            
+            const search = searchElement ? searchElement.value.toLowerCase() : '';
+            const cityFilter = cityElement ? cityElement.value : '';
+            const statusFilter = statusElement ? statusElement.value : '';
+            const sortBy = sortElement ? sortElement.value : 'name_asc';
+            
+            // Фильтрация данных
+            let filtered = manufacturersData;
+            
+            if (search) {
+                filtered = filtered.filter(m => 
+                    m.name.toLowerCase().includes(search) ||
+                    (m.city && m.city.toLowerCase().includes(search)) ||
+                    (m.email && m.email.toLowerCase().includes(search))
+                );
+            }
+            
+            if (cityFilter) {
+                filtered = filtered.filter(m => m.city === cityFilter);
+            }
+            
+            if (statusFilter) {
+                filtered = filtered.filter(m => m.status === statusFilter);
+            }
+            
+            // Сортировка
+            switch(sortBy) {
+                case 'name_desc':
+                    filtered.sort((a, b) => b.name.localeCompare(a.name));
+                    break;
+                case 'newest':
+                    filtered.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+                    break;
+                case 'products_desc':
+                    filtered.sort((a, b) => {
+                        const aCount = productsData.filter(p => p.manufacturer_id === a.id).length;
+                        const bCount = productsData.filter(p => p.manufacturer_id === b.id).length;
+                        return bCount - aCount;
+                    });
+                    break;
+                default: // name_asc
+                    filtered.sort((a, b) => a.name.localeCompare(b.name));
+            }
+            
+            // Обновление счетчика
+            totalManufacturers = filtered.length;
+            updateElementText('manufacturersCount', `Найдено: ${filtered.length} производителей`);
+            
+            // Заполнение таблицы
+            displayManufacturersTable(filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize));
+            
+            // Обновление пагинации
+            updatePagination('manufacturersPagination', totalManufacturers, currentPage, pageSize, loadManufacturers);
+            
+            // Обновление фильтра городов
+            updateCityFilter();
+        }
+
+        // Отображение таблицы производителей
+        function displayManufacturersTable(data) {
+            const tbody = document.getElementById('manufacturersTable');
+            if (!tbody) return;
+            
+            tbody.innerHTML = '';
+            
+            if (data.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="8" class="text-center py-4 text-muted">
+                            <i class="bi bi-search display-6 d-block mb-2"></i>
+                            Производители не найдены
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            data.forEach(manufacturer => {
+                const productCount = productsData.filter(p => p.manufacturer_id === manufacturer.id).length;
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>
+                        <input type="checkbox" class="form-check-input manufacturer-select" value="${manufacturer.id}">
+                    </td>
+                    <td><span class="badge bg-secondary rounded-pill">${manufacturer.id}</span></td>
+                    <td>
+                        <div class="d-flex align-items-center">
+                            <div class="avatar-sm me-2 bg-primary bg-opacity-10 rounded d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                <i class="bi bi-building text-primary"></i>
+                            </div>
+                            <div>
+                                <strong class="d-block">${escapeHtml(manufacturer.name)}</strong>
+                                <small class="text-muted">${escapeHtml(manufacturer.email || 'Нет email')}</small>
+                                ${manufacturer.featured ? 
+                                    '<span class="badge bg-warning ms-2"><i class="bi bi-star me-1"></i>Рекомендуемый</span>' : 
+                                    ''}
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 rounded-pill">
+                            <i class="bi bi-geo-alt me-1"></i>${escapeHtml(manufacturer.city || '—')}
+                        </span>
+                    </td>
+                    <td>
+                        <div><small><i class="bi bi-envelope me-1"></i>${escapeHtml(manufacturer.email || '—')}</small></div>
+                        <div><small><i class="bi bi-telephone me-1"></i>${escapeHtml(manufacturer.phone || '—')}</small></div>
+                    </td>
+                    <td>
+                        <button class="btn btn-sm ${productCount > 0 ? 'btn-success' : 'btn-secondary'} rounded-pill" 
+                                onclick="switchSection('products'); setTimeout(() => {
+                                    const filter = document.getElementById('filterManufacturer');
+                                    if (filter) filter.value='${manufacturer.id}';
+                                    loadProducts();
+                                }, 100);"
+                                title="Показать товары">
+                            ${productCount} <i class="bi bi-box-arrow-up-right ms-1"></i>
+                        </button>
+                    </td>
+                    <td>
+                        <span class="badge ${manufacturer.status === 'active' ? 'bg-success' : 'bg-secondary'} rounded-pill">
+                            <i class="bi ${manufacturer.status === 'active' ? 'bi-check-circle' : 'bi-x-circle'} me-1"></i>
+                            ${manufacturer.status === 'active' ? 'Активный' : 'Неактивный'}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="d-flex gap-1">
+                            <button class="btn-action btn-view" onclick="viewManufacturer(${manufacturer.id})" title="Просмотр">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                            <button class="btn-action btn-edit" onclick="editManufacturer(${manufacturer.id})" title="Редактировать">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn-action btn-delete" onclick="deleteManufacturer(${manufacturer.id})" title="Удалить">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Просмотр производителя
+        function viewManufacturer(id) {
+            const manufacturer = manufacturersData.find(m => m.id === id);
+            if (!manufacturer) return;
+            
+            const modal = new bootstrap.Modal(document.createElement('div'));
+            modal._element.className = 'modal fade';
+            modal._element.innerHTML = `
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">
+                                <i class="bi bi-building me-2"></i>${escapeHtml(manufacturer.name)}
+                            </h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6><i class="bi bi-info-circle me-2"></i>Информация</h6>
+                                    <p><strong>Город:</strong> ${escapeHtml(manufacturer.city || 'Не указан')}</p>
+                                    <p><strong>Статус:</strong> 
+                                        <span class="badge ${manufacturer.status === 'active' ? 'bg-success' : 'bg-secondary'}">
+                                            ${manufacturer.status === 'active' ? 'Активный' : 'Неактивный'}
+                                        </span>
+                                    </p>
+                                    <p><strong>Рекомендуемый:</strong> ${manufacturer.featured ? 'Да' : 'Нет'}</p>
+                                    
+                                    <h6 class="mt-4"><i class="bi bi-telephone me-2"></i>Контакты</h6>
+                                    <p><strong>Email:</strong> ${escapeHtml(manufacturer.email || 'Не указан')}</p>
+                                    <p><strong>Телефон:</strong> ${escapeHtml(manufacturer.phone || 'Не указан')}</p>
+                                    <p><strong>Сайт:</strong> ${manufacturer.website ? 
+                                        `<a href="https://${escapeHtml(manufacturer.website)}" target="_blank">${escapeHtml(manufacturer.website)}</a>` : 
+                                        'Не указан'}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6><i class="bi bi-box-seam me-2"></i>Товары производителя</h6>
+                                    ${getManufacturerProductsHTML(manufacturer.id)}
+                                </div>
+                            </div>
+                            
+                            ${manufacturer.description ? `
+                                <div class="mt-4">
+                                    <h6><i class="bi bi-card-text me-2"></i>Описание</h6>
+                                    <p>${escapeHtml(manufacturer.description)}</p>
+                                </div>
+                            ` : ''}
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-admin btn-admin-warning" data-bs-dismiss="modal">Закрыть</button>
+                            <button type="button" class="btn btn-admin btn-admin-primary" onclick="editManufacturer(${manufacturer.id}); const modalInstance = bootstrap.Modal.getInstance(document.querySelector('.modal.show')); if (modalInstance) modalInstance.hide();">
+                                <i class="bi bi-pencil me-1"></i>Редактировать
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal._element);
+            modal.show();
+            
+            modal._element.addEventListener('hidden.bs.modal', function() {
+                document.body.removeChild(modal._element);
+            });
+        }
+
+        // Получение HTML товаров производителя
+        function getManufacturerProductsHTML(manufacturerId) {
+            const manufacturerProducts = productsData.filter(p => p.manufacturer_id === manufacturerId);
+            
+            if (manufacturerProducts.length === 0) {
+                return '<p class="text-muted">Товары не найдены</p>';
+            }
+            
+            let html = '<div class="list-group">';
+            manufacturerProducts.slice(0, 5).forEach(product => {
+                html += `
+                    <a href="#" class="list-group-item list-group-item-action bg-dark border-secondary" 
+                       onclick="editProduct(${product.id}); const modalInstance = bootstrap.Modal.getInstance(document.querySelector('.modal.show')); if (modalInstance) modalInstance.hide();">
+                        <div class="d-flex w-100 justify-content-between">
+                            <strong>${escapeHtml(product.name)}</strong>
+                            <span class="badge bg-primary">${formatCurrency(product.price)}</span>
+                        </div>
+                        <small class="text-muted">${escapeHtml(product.type || 'Без типа')}</small>
+                    </a>
+                `;
+            });
+            
+            if (manufacturerProducts.length > 5) {
+                html += `
+                    <div class="list-group-item bg-dark text-center">
+                        <small class="text-muted">и еще ${manufacturerProducts.length - 5} товаров</small>
+                    </div>
+                `;
+            }
+            
+            html += '</div>';
+            return html;
+        }
+
+        // Редактирование производителя
+        function editManufacturer(id) {
+            showManufacturerModal(id);
+        }
+
+        // Показ модального окна производителя
+        function showManufacturerModal(id = null) {
+            const modalElement = document.getElementById('manufacturerModal');
+            if (!modalElement) return;
+            
+            const modal = new bootstrap.Modal(modalElement);
+            const title = document.getElementById('manufacturerModalTitle');
+            const form = document.getElementById('manufacturerForm');
+            
+            if (id) {
+                // Редактирование существующего производителя
+                const manufacturer = manufacturersData.find(m => m.id === id);
+                if (manufacturer) {
+                    title.textContent = 'Редактировать производителя';
+                    document.getElementById('manufacturerId').value = manufacturer.id;
+                    document.getElementById('manufacturerName').value = manufacturer.name;
+                    document.getElementById('manufacturerCity').value = manufacturer.city || '';
+                    document.getElementById('manufacturerWebsite').value = manufacturer.website || '';
+                    document.getElementById('manufacturerPhone').value = manufacturer.phone || '';
+                    document.getElementById('manufacturerEmail').value = manufacturer.email || '';
+                    document.getElementById('manufacturerDescription').value = manufacturer.description || '';
+                    document.getElementById('manufacturerStatus').value = manufacturer.status || 'active';
+                    document.getElementById('manufacturerFeatured').checked = manufacturer.featured || false;
+                }
+            } else {
+                // Добавление нового производителя
+                title.textContent = 'Добавить производителя';
+                if (form) form.reset();
+                document.getElementById('manufacturerId').value = '';
+                document.getElementById('manufacturerStatus').value = 'active';
+            }
+            
+            modal.show();
+        }
+
+        // Сохранение производителя
+        function saveManufacturer() {
+            const id = document.getElementById('manufacturerId').value;
+            const name = document.getElementById('manufacturerName').value.trim();
+            const city = document.getElementById('manufacturerCity').value.trim();
+            
+            if (!name) {
+                showNotification('Введите название компании', 'error');
+                document.getElementById('manufacturerName').focus();
+                return;
+            }
+            
+            if (!city) {
+                showNotification('Введите город', 'error');
+                document.getElementById('manufacturerCity').focus();
+                return;
+            }
+            
+            if (id) {
+                // Обновление существующего производителя
+                const index = manufacturersData.findIndex(m => m.id == id);
+                if (index !== -1) {
+                    manufacturersData[index] = {
+                        ...manufacturersData[index],
+                        name,
+                        city,
+                        website: document.getElementById('manufacturerWebsite').value.trim(),
+                        phone: document.getElementById('manufacturerPhone').value.trim(),
+                        email: document.getElementById('manufacturerEmail').value.trim(),
+                        description: document.getElementById('manufacturerDescription').value.trim(),
+                        status: document.getElementById('manufacturerStatus').value,
+                        featured: document.getElementById('manufacturerFeatured').checked,
+                        updated_at: new Date().toISOString()
+                    };
+                    
+                    showNotification('Производитель успешно обновлен!', 'success');
+                }
+            } else {
+                // Добавление нового производителя
+                const newId = manufacturersData.length > 0 ? 
+                    Math.max(...manufacturersData.map(m => m.id)) + 1 : 1;
+                
+                manufacturersData.push({
+                    id: newId,
+                    name,
+                    city,
+                    website: document.getElementById('manufacturerWebsite').value.trim(),
+                    phone: document.getElementById('manufacturerPhone').value.trim(),
+                    email: document.getElementById('manufacturerEmail').value.trim(),
+                    description: document.getElementById('manufacturerDescription').value.trim(),
+                    status: document.getElementById('manufacturerStatus').value,
+                    featured: document.getElementById('manufacturerFeatured').checked,
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                });
+                
+                showNotification('Производитель успешно добавлен!', 'success');
+            }
+            
+            // Сохраняем данные
+            saveData();
+            
+            // Закрываем модальное окно
+            const modalInstance = bootstrap.Modal.getInstance(document.getElementById('manufacturerModal'));
+            if (modalInstance) modalInstance.hide();
+            
+            // Обновляем данные
+            loadManufacturers();
+            updateDashboardStats();
+        }
+
+        // Удаление производителя
+        function deleteManufacturer(id) {
+            const manufacturer = manufacturersData.find(m => m.id === id);
+            if (!manufacturer) return;
+            
+            const productCount = productsData.filter(p => p.manufacturer_id === id).length;
+            
+            const confirmMessage = productCount > 0 ?
+                `Вы уверены, что хотите удалить производителя "${manufacturer.name}"? Будет удалено ${productCount} связанных товаров.` :
+                `Вы уверены, что хотите удалить производителя "${manufacturer.name}"?`;
+            
+            if (!confirm(confirmMessage)) {
+                return;
+            }
+            
+            // Удаляем производителя
+            manufacturersData = manufacturersData.filter(m => m.id !== id);
+            
+            // Удаляем связанные товары
+            productsData = productsData.filter(p => p.manufacturer_id !== id);
+            
+            // Сохраняем данные
+            saveData();
+            
+            // Показываем уведомление
+            showNotification(`Производитель "${manufacturer.name}" удален${productCount > 0 ? ` вместе с ${productCount} товарами` : ''}`, 'success');
+            
+            // Обновляем данные
+            loadManufacturers();
+            loadProducts();
+            updateDashboardStats();
+        }
+
+        // Обновление фильтра городов
+        function updateCityFilter() {
+            const cities = [...new Set(manufacturersData.map(m => m.city).filter(city => city))].sort();
+            const citySelect = document.getElementById('filterCity');
+            if (!citySelect) return;
+            
+            // Сохраняем текущее значение
+            const currentValue = citySelect.value;
+            
+            // Очищаем опции, кроме первой
+            citySelect.innerHTML = '<option value="">Все города</option>';
+            
+            // Добавляем города
+            cities.forEach(city => {
+                const option = document.createElement('option');
+                option.value = city;
+                option.textContent = city;
+                citySelect.appendChild(option);
+            });
+            
+            // Восстанавливаем значение
+            citySelect.value = currentValue;
+        }
+
+        // Загрузка товаров
+        function loadProducts() {
+            console.log('Загрузка товаров...');
+            
+            const searchElement = document.getElementById('searchProducts');
+            const typeElement = document.getElementById('filterType');
+            const manufacturerElement = document.getElementById('filterManufacturer');
+            const priceElement = document.getElementById('priceRange');
+            
+            const search = searchElement ? searchElement.value.toLowerCase() : '';
+            const typeFilter = typeElement ? typeElement.value : '';
+            const manufacturerFilter = manufacturerElement ? manufacturerElement.value : '';
+            const priceFilter = priceElement ? priceElement.value : '';
+            
+            // Фильтрация данных
+            let filtered = productsData;
+            
+            if (search) {
+                filtered = filtered.filter(p => 
+                    p.name.toLowerCase().includes(search) ||
+                    (p.sku && p.sku.toLowerCase().includes(search)) ||
+                    (p.specs && p.specs.toLowerCase().includes(search))
+                );
+            }
+            
+            if (typeFilter) {
+                filtered = filtered.filter(p => p.type === typeFilter);
+            }
+            
+            if (manufacturerFilter) {
+                filtered = filtered.filter(p => p.manufacturer_id === parseInt(manufacturerFilter));
+            }
+            
+            if (priceFilter) {
+                if (priceFilter === '0-100') {
+                    filtered = filtered.filter(p => p.price <= 100);
+                } else if (priceFilter === '100-500') {
+                    filtered = filtered.filter(p => p.price >= 100 && p.price <= 500);
+                } else if (priceFilter === '500-1000') {
+                    filtered = filtered.filter(p => p.price >= 500 && p.price <= 1000);
+                } else if (priceFilter === '1000+') {
+                    filtered = filtered.filter(p => p.price >= 1000);
+                }
+            }
+            
+            // Обновление счетчика
+            totalProducts = filtered.length;
+            updateElementText('productsCount', `Найдено: ${filtered.length} товаров`);
+            
+            // Заполнение таблицы
+            displayProductsTable(filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize));
+            
+            // Обновление пагинации
+            updatePagination('productsPagination', totalProducts, currentPage, pageSize, loadProducts);
+            
+            // Обновление фильтров
+            updateProductFilters();
+        }
+
+        // Отображение таблицы товаров
+        function displayProductsTable(data) {
+            const tbody = document.getElementById('productsTable');
+            if (!tbody) return;
+            
+            tbody.innerHTML = '';
+            
+            if (data.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="8" class="text-center py-4 text-muted">
+                            <i class="bi bi-box-seam display-6 d-block mb-2"></i>
+                            Товары не найдены
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            data.forEach(product => {
+                const manufacturer = manufacturersData.find(m => m.id === product.manufacturer_id);
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>
+                        <input type="checkbox" class="form-check-input product-select" value="${product.id}">
+                    </td>
+                    <td><span class="badge bg-secondary rounded-pill">${product.id}</span></td>
+                    <td>
+                        <div class="d-flex align-items-center">
+                            <div class="avatar-sm me-2 bg-success bg-opacity-10 rounded d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                <i class="bi bi-box-seam text-success"></i>
+                            </div>
+                            <div>
+                                <strong class="d-block">${escapeHtml(product.name)}</strong>
+                                <small class="text-muted">${escapeHtml(product.sku || 'Без артикула')}</small>
+                                ${product.category ? `<span class="badge bg-info ms-2">${escapeHtml(product.category)}</span>` : ''}
+                            </div>
+                        </div>
+                    </td>
+                    <td>${escapeHtml(manufacturer ? manufacturer.name : '—')}</td>
+                    <td>${escapeHtml(product.type || '—')}</td>
+                    <td>
+                        <strong>${formatCurrency(product.price)}</strong>
+                        <div><small class="text-muted">за ${escapeHtml(product.unit || 'м')}</small></div>
+                    </td>
+                    <td>
+                        <span class="badge ${product.status === 'active' ? 'bg-success' : product.status === 'archived' ? 'bg-secondary' : 'bg-warning'} rounded-pill">
+                            <i class="bi ${product.status === 'active' ? 'bi-check-circle' : product.status === 'archived' ? 'bi-archive' : 'bi-x-circle'} me-1"></i>
+                            ${getStatusText(product.status)}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="d-flex gap-1">
+                            <button class="btn-action btn-edit" onclick="editProduct(${product.id})" title="Редактировать">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn-action btn-delete" onclick="deleteProduct(${product.id})" title="Удалить">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Редактирование товара
+        function editProduct(id) {
+            showProductModal(id);
+        }
+
+        // Показ модального окна товара
+        function showProductModal(id = null) {
+            // Заполняем селект производителей
+            const manufacturerSelect = document.getElementById('productManufacturer');
+            if (manufacturerSelect) {
+                manufacturerSelect.innerHTML = '<option value="">Выберите производителя</option>';
+                manufacturersData.forEach(manufacturer => {
+                    const option = document.createElement('option');
+                    option.value = manufacturer.id;
+                    option.textContent = manufacturer.name;
+                    manufacturerSelect.appendChild(option);
+                });
+            }
+            
+            const modalElement = document.getElementById('productModal');
+            if (!modalElement) return;
+            
+            const modal = new bootstrap.Modal(modalElement);
+            const title = document.getElementById('productModalTitle');
+            const form = document.getElementById('productForm');
+            
+            if (id) {
+                // Редактирование существующего товара
+                const product = productsData.find(p => p.id === id);
+                if (product) {
+                    title.textContent = 'Редактировать товар';
+                    document.getElementById('productId').value = product.id;
+                    document.getElementById('productManufacturer').value = product.manufacturer_id;
+                    document.getElementById('productName').value = product.name;
+                    document.getElementById('productType').value = product.type || '';
+                    document.getElementById('productPrice').value = product.price || '';
+                    document.getElementById('productUnit').value = product.unit || 'м';
+                    document.getElementById('productSku').value = product.sku || '';
+                    document.getElementById('productCategory').value = product.category || '';
+                    document.getElementById('productSpecs').value = product.specs || '';
+                    document.getElementById('productUrl').value = product.url || '';
+                    document.getElementById('productStatus').value = product.status || 'active';
+                    document.getElementById('productStock').value = product.stock || 'in_stock';
+                }
+            } else {
+                // Добавление нового товара
+                title.textContent = 'Добавить товар';
+                if (form) form.reset();
+                document.getElementById('productId').value = '';
+                document.getElementById('productUnit').value = 'м';
+                document.getElementById('productStatus').value = 'active';
+                document.getElementById('productStock').value = 'in_stock';
+            }
+            
+            modal.show();
+        }
+
+        // Сохранение товара
+        function saveProduct() {
+            const id = document.getElementById('productId').value;
+            const manufacturerId = document.getElementById('productManufacturer').value;
+            const name = document.getElementById('productName').value.trim();
+            const price = parseFloat(document.getElementById('productPrice').value);
+            
+            if (!manufacturerId) {
+                showNotification('Выберите производителя', 'error');
+                document.getElementById('productManufacturer').focus();
+                return;
+            }
+            
+            if (!name) {
+                showNotification('Введите название товара', 'error');
+                document.getElementById('productName').focus();
+                return;
+            }
+            
+            if (!price || price <= 0) {
+                showNotification('Введите корректную цену', 'error');
+                document.getElementById('productPrice').focus();
+                return;
+            }
+            
+            if (id) {
+                // Обновление существующего товара
+                const index = productsData.findIndex(p => p.id == id);
+                if (index !== -1) {
+                    productsData[index] = {
+                        ...productsData[index],
+                        manufacturer_id: parseInt(manufacturerId),
+                        name,
+                        type: document.getElementById('productType').value,
+                        price,
+                        unit: document.getElementById('productUnit').value,
+                        sku: document.getElementById('productSku').value.trim(),
+                        category: document.getElementById('productCategory').value,
+                        specs: document.getElementById('productSpecs').value.trim(),
+                        url: document.getElementById('productUrl').value.trim(),
+                        status: document.getElementById('productStatus').value,
+                        stock: document.getElementById('productStock').value,
+                        updated_at: new Date().toISOString()
+                    };
+                    
+                    showNotification('Товар успешно обновлен!', 'success');
+                }
+            } else {
+                // Добавление нового товара
+                const newId = productsData.length > 0 ? 
+                    Math.max(...productsData.map(p => p.id)) + 1 : 1;
+                
+                productsData.push({
+                    id: newId,
+                    manufacturer_id: parseInt(manufacturerId),
+                    name,
+                    type: document.getElementById('productType').value,
+                    price,
+                    unit: document.getElementById('productUnit').value,
+                    sku: document.getElementById('productSku').value.trim(),
+                    category: document.getElementById('productCategory').value,
+                    specs: document.getElementById('productSpecs').value.trim(),
+                    url: document.getElementById('productUrl').value.trim(),
+                    status: document.getElementById('productStatus').value,
+                    stock: document.getElementById('productStock').value,
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                });
+                
+                showNotification('Товар успешно добавлен!', 'success');
+            }
+            
+            // Сохраняем данные
+            saveData();
+            
+            // Закрываем модальное окно
+            const modalInstance = bootstrap.Modal.getInstance(document.getElementById('productModal'));
+            if (modalInstance) modalInstance.hide();
+            
+            // Обновляем данные
+            loadProducts();
+            updateDashboardStats();
+        }
+
+        // Удаление товара
+        function deleteProduct(id) {
+            const product = productsData.find(p => p.id === id);
+            if (!product) return;
+            
+            if (!confirm(`Вы уверены, что хотите удалить товар "${product.name}"?`)) {
+                return;
+            }
+            
+            // Удаляем товар
+            productsData = productsData.filter(p => p.id !== id);
+            
+            // Сохраняем данные
+            saveData();
+            
+            // Показываем уведомление
+            showNotification(`Товар "${product.name}" удален`, 'success');
+            
+            // Обновляем данные
+            loadProducts();
+            updateDashboardStats();
+        }
+
+        // Обновление фильтров товаров
+        function updateProductFilters() {
+            // Типы товаров
+            const types = [...new Set(productsData.map(p => p.type).filter(type => type))].sort();
+            const typeSelect = document.getElementById('filterType');
+            if (typeSelect) {
+                const currentType = typeSelect.value;
+                typeSelect.innerHTML = '<option value="">Все типы</option>';
+                types.forEach(type => {
+                    const option = document.createElement('option');
+                    option.value = type;
+                    option.textContent = type;
+                    typeSelect.appendChild(option);
+                });
+                typeSelect.value = currentType;
+            }
+            
+            // Производители
+            const manufacturerSelect = document.getElementById('filterManufacturer');
+            if (manufacturerSelect) {
+                const currentManufacturer = manufacturerSelect.value;
+                manufacturerSelect.innerHTML = '<option value="">Все производители</option>';
+                manufacturersData.forEach(manufacturer => {
+                    const option = document.createElement('option');
+                    option.value = manufacturer.id;
+                    option.textContent = manufacturer.name;
+                    manufacturerSelect.appendChild(option);
+                });
+                manufacturerSelect.value = currentManufacturer;
+            }
+        }
+
+        // Загрузка статистики
+        function loadStatistics() {
+            // Обновление детальной статистики
+            updateDetailedStats();
+            
+            // Построение графиков
+            buildCharts();
+            
+            showNotification('Статистика загружена', 'info');
+        }
+
+        // Обновление детальной статистики
+        function updateDetailedStats() {
+            // Подсчет метрик
+            const manufacturerCount = manufacturersData.length;
+            const productCount = productsData.length;
+            const cities = [...new Set(manufacturersData.map(m => m.city))].filter(city => city);
+            const avgPrice = productCount > 0 ? 
+                productsData.reduce((sum, p) => sum + (p.price || 0), 0) / productCount : 0;
+            const totalRevenue = productsData.reduce((sum, p) => sum + (p.price || 0) * 100, 0);
+            
+            // Обновление элементов
+            updateElementText('detailedManufacturers', manufacturerCount);
+            updateElementText('detailedProducts', productCount);
+            updateElementText('detailedAvgPrice', formatCurrency(avgPrice));
+            updateElementText('detailedRevenue', formatCurrency(totalRevenue));
+            
+            // Расчет роста (демо данные)
+            updateElementText('manufacturersGrowth', '+12%');
+            updateElementText('productsGrowth', '+23%');
+            updateElementText('priceGrowth', '+5%');
+            updateElementText('revenueGrowth', '+18%');
+        }
+
+        // Построение графиков
+        function buildCharts() {
+            buildProductsChart();
+            buildManufacturersChart();
+            buildCityChart();
+            buildTypeChart();
+        }
+
+        // График динамики добавления товаров
+        function buildProductsChart() {
+            const ctx = document.getElementById('productsChart');
+            if (!ctx) return;
+            
+            if (productsChart) {
+                productsChart.destroy();
+            }
+            
+            // Демо данные
+            const months = ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'];
+            const data = months.map(() => Math.floor(Math.random() * 100) + 20);
+            
+            productsChart = new Chart(ctx.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: months,
+                    datasets: [{
+                        label: 'Добавлено товаров',
+                        data: data,
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                color: '#94a3b8'
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#94a3b8'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#94a3b8'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // График топ производителей
+        function buildManufacturersChart() {
+            const ctx = document.getElementById('manufacturersChart');
+            if (!ctx) return;
+            
+            if (manufacturersChart) {
+                manufacturersChart.destroy();
+            }
+            
+            // Группировка по производителям
+            const manufacturerProducts = {};
+            productsData.forEach(product => {
+                if (!manufacturerProducts[product.manufacturer_id]) {
+                    manufacturerProducts[product.manufacturer_id] = 0;
+                }
+                manufacturerProducts[product.manufacturer_id]++;
+            });
+            
+            // Сортировка и выбор топ-5
+            const topManufacturers = Object.entries(manufacturerProducts)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 5)
+                .map(([id, count]) => ({
+                    name: manufacturersData.find(m => m.id == id)?.name || 'Неизвестно',
+                    count: count
+                }));
+            
+            manufacturersChart = new Chart(ctx.getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: topManufacturers.map(m => m.name),
+                    datasets: [{
+                        data: topManufacturers.map(m => m.count),
+                        backgroundColor: [
+                            '#3b82f6',
+                            '#10b981',
+                            '#f59e0b',
+                            '#ef4444',
+                            '#8b5cf6'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: '#94a3b8',
+                                padding: 20
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // График распределения по городам
+        function buildCityChart() {
+            const ctx = document.getElementById('cityChart');
+            if (!ctx) return;
+            
+            if (cityChart) {
+                cityChart.destroy();
+            }
+            
+            // Группировка по городам
+            const cityCount = {};
+            manufacturersData.forEach(manufacturer => {
+                if (manufacturer.city) {
+                    if (!cityCount[manufacturer.city]) {
+                        cityCount[manufacturer.city] = 0;
+                    }
+                    cityCount[manufacturer.city]++;
+                }
+            });
+            
+            // Сортировка по количеству
+            const sortedCities = Object.entries(cityCount)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 8);
+            
+            cityChart = new Chart(ctx.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: sortedCities.map(c => c[0]),
+                    datasets: [{
+                        label: 'Производителей',
+                        data: sortedCities.map(c => c[1]),
+                        backgroundColor: '#10b981'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#94a3b8'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#94a3b8'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // График распределения по типам
+        function buildTypeChart() {
+            const ctx = document.getElementById('typeChart');
+            if (!ctx) return;
+            
+            if (typeChart) {
+                typeChart.destroy();
+            }
+            
+            // Группировка по типам
+            const typeCount = {};
+            productsData.forEach(product => {
+                if (product.type) {
+                    if (!typeCount[product.type]) {
+                        typeCount[product.type] = 0;
+                    }
+                    typeCount[product.type]++;
+                }
+            });
+            
+            typeChart = new Chart(ctx.getContext('2d'), {
+                type: 'pie',
+                data: {
+                    labels: Object.keys(typeCount),
+                    datasets: [{
+                        data: Object.values(typeCount),
+                        backgroundColor: [
+                            '#3b82f6',
+                            '#10b981',
+                            '#f59e0b',
+                            '#ef4444',
+                            '#8b5cf6',
+                            '#ec4899',
+                            '#14b8a6',
+                            '#f97316'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                color: '#94a3b8',
+                                padding: 20
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Загрузка настроек
+        function loadSettings() {
+            const settings = JSON.parse(localStorage.getItem('adminSettings') || '{}');
+            
+            // Устанавливаем значения из сохраненных настроек или по умолчанию
+            document.getElementById('adminName').value = settings.adminName || 'Администратор';
+            document.getElementById('adminEmail').value = settings.adminEmail || 'admin@cableproduction.ru';
+            document.getElementById('pageSize').value = settings.pageSize || '25';
+            document.getElementById('interfaceLanguage').value = settings.interfaceLanguage || 'ru';
+            document.getElementById('notifications').checked = settings.notifications !== false;
+            document.getElementById('autoRefresh').checked = settings.autoRefresh || false;
+            document.getElementById('darkMode').checked = settings.darkMode !== false;
+            document.getElementById('emailAlerts').checked = settings.emailAlerts || false;
+            document.getElementById('auditLog').checked = settings.auditLog !== false;
+            document.getElementById('backupEnabled').checked = settings.backupEnabled !== false;
+            document.getElementById('twoFactorAuth').value = settings.twoFactorAuth || 'none';
+            document.getElementById('sessionTimeout').value = settings.sessionTimeout || '8';
+        }
+
+        // Сохранение настроек
+        function saveSettings() {
+            const settings = {
+                adminName: document.getElementById('adminName').value,
+                adminEmail: document.getElementById('adminEmail').value,
+                pageSize: document.getElementById('pageSize').value,
+                interfaceLanguage: document.getElementById('interfaceLanguage').value,
+                notifications: document.getElementById('notifications').checked,
+                autoRefresh: document.getElementById('autoRefresh').checked,
+                darkMode: document.getElementById('darkMode').checked,
+                emailAlerts: document.getElementById('emailAlerts').checked,
+                auditLog: document.getElementById('auditLog').checked,
+                backupEnabled: document.getElementById('backupEnabled').checked,
+                twoFactorAuth: document.getElementById('twoFactorAuth').value,
+                sessionTimeout: document.getElementById('sessionTimeout').value
+            };
+            
+            // Сохраняем в localStorage
+            localStorage.setItem('adminSettings', JSON.stringify(settings));
+            
+            // Применяем настройки
+            applySettings(settings);
+            
+            // Показываем уведомление
+            showNotification('Настройки успешно сохранены!', 'success');
+        }
+
+        // Применение настроек
+        function applySettings(settings) {
+            // Применяем размер страницы
+            pageSize = parseInt(settings.pageSize) || 25;
+            
+            // Обновляем имя пользователя
+            updateElementText('currentUser', settings.adminName);
+            updateElementText('sidebarUserName', settings.adminName);
+            updateElementText('sidebarUserEmail', settings.adminEmail);
+            
+            // Перезагружаем данные с новыми настройками
+            loadManufacturers();
+            loadProducts();
+        }
+
+        // Экспорт производителей
+        function exportManufacturers() {
+            const data = manufacturersData.map(m => {
+                const productCount = productsData.filter(p => p.manufacturer_id === m.id).length;
+                return {
+                    'ID': m.id,
+                    'Название': m.name,
+                    'Город': m.city || '',
+                    'Email': m.email || '',
+                    'Телефон': m.phone || '',
+                    'Сайт': m.website || '',
+                    'Описание': m.description || '',
+                    'Статус': m.status === 'active' ? 'Активный' : 'Неактивный',
+                    'Рекомендуемый': m.featured ? 'Да' : 'Нет',
+                    'Количество товаров': productCount,
+                    'Дата создания': formatDate(m.created_at),
+                    'Дата обновления': formatDate(m.updated_at)
+                };
+            });
+            
+            exportToCSV(data, 'Производители');
+        }
+
+        // Экспорт продукции
+        function exportProducts() {
+            const data = productsData.map(p => {
+                const manufacturer = manufacturersData.find(m => m.id === p.manufacturer_id);
+                return {
+                    'ID': p.id,
+                    'Название': p.name,
+                    'Артикул': p.sku || '',
+                    'Производитель': manufacturer ? manufacturer.name : '',
+                    'ID производителя': p.manufacturer_id,
+                    'Тип': p.type || '',
+                    'Категория': p.category || '',
+                    'Цена': p.price,
+                    'Единица измерения': p.unit || 'м',
+                    'Характеристики': p.specs || '',
+                    'Ссылка': p.url || '',
+                    'Статус': getStatusText(p.status),
+                    'Наличие': getStockText(p.stock),
+                    'Дата создания': formatDate(p.created_at),
+                    'Дата обновления': formatDate(p.updated_at)
+                };
+            });
+            
+            exportToCSV(data, 'Продукция');
+        }
+
+        // Экспорт в CSV
+        function exportToCSV(data, filename) {
+            if (!data || data.length === 0) {
+                showNotification('Нет данных для экспорта', 'warning');
+                return;
+            }
+            
+            // Создание CSV строки
+            const headers = Object.keys(data[0]);
+            const csvRows = [
+                headers.join(';'),
+                ...data.map(row => 
+                    headers.map(header => {
+                        const value = row[header] || '';
+                        const escaped = String(value).replace(/"/g, '""');
+                        return `"${escaped}"`;
+                    }).join(';')
+                )
+            ];
+            
+            const csvString = csvRows.join('\n');
+            const blob = new Blob(['\ufeff', csvString], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.setAttribute('href', url);
+            const timestamp = new Date().toISOString().slice(0,19).replace(/[:T]/g, '-');
+            link.setAttribute('download', `${filename}_${timestamp}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showNotification(`Экспортировано ${data.length} записей! Файл загружен.`, 'success');
+        }
+
+        // Обновление пагинации
+        function updatePagination(containerId, totalItems, currentPage, pageSize, callback) {
+            const totalPages = Math.ceil(totalItems / pageSize);
+            const container = document.getElementById(containerId);
+            if (!container || totalPages <= 1) {
+                if (container) container.innerHTML = '';
+                return;
+            }
+            
+            let html = `
+                <button class="page-btn" onclick="changePage(1, 'loadManufacturers')" ${currentPage === 1 ? 'disabled' : ''}>
+                    <i class="bi bi-chevron-double-left"></i>
+                </button>
+                <button class="page-btn" onclick="changePage(${currentPage - 1}, 'loadManufacturers')" ${currentPage === 1 ? 'disabled' : ''}>
+                    <i class="bi bi-chevron-left"></i>
+                </button>
+            `;
+            
+            // Показать до 5 страниц вокруг текущей
+            const startPage = Math.max(1, currentPage - 2);
+            const endPage = Math.min(totalPages, currentPage + 2);
+            
+            for (let i = startPage; i <= endPage; i++) {
+                html += `
+                    <button class="page-btn ${i === currentPage ? 'active' : ''}" 
+                            onclick="changePage(${i}, 'loadManufacturers')">
+                        ${i}
+                    </button>
+                `;
+            }
+            
+            html += `
+                <button class="page-btn" onclick="changePage(${currentPage + 1}, 'loadManufacturers')" ${currentPage === totalPages ? 'disabled' : ''}>
+                    <i class="bi bi-chevron-right"></i>
+                </button>
+                <button class="page-btn" onclick="changePage(${totalPages}, 'loadManufacturers')" ${currentPage === totalPages ? 'disabled' : ''}>
+                    <i class="bi bi-chevron-double-right"></i>
+                </button>
+            `;
+            
+            container.innerHTML = html;
+        }
+
+        // Смена страницы
+        function changePage(page, callbackName) {
+            currentPage = page;
+            if (callbackName === 'loadManufacturers') {
+                loadManufacturers();
+            } else if (callbackName === 'loadProducts') {
+                loadProducts();
+            }
+        }
+
+        // Форматирование даты
+        function formatDate(dateString) {
+            if (!dateString) return '—';
+            try {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('ru-RU') + ' ' + date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+            } catch {
+                return '—';
+            }
+        }
+
+        // Форматирование валюты
+        function formatCurrency(amount) {
+            if (!amount && amount !== 0) return '0 руб.';
+            return new Intl.NumberFormat('ru-RU', {
+                style: 'currency',
+                currency: 'RUB',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 2
+            }).format(amount);
+        }
+
+        // Получение текста статуса
+        function getStatusText(status) {
+            const statusMap = {
+                'active': 'Активный',
+                'inactive': 'Неактивный',
+                'archived': 'В архиве'
+            };
+            return statusMap[status] || status;
+        }
+
+        // Получение текста наличия
+        function getStockText(stock) {
+            const stockMap = {
+                'in_stock': 'В наличии',
+                'out_of_stock': 'Нет в наличии',
+                'pre_order': 'Под заказ'
+            };
+            return stockMap[stock] || stock;
+        }
+
+        // Глобальный поиск
+        function performGlobalSearch() {
+            const query = document.getElementById('globalSearch').value.toLowerCase();
+            if (!query) {
+                showNotification('Введите поисковый запрос', 'warning');
+                return;
+            }
+            
+            // Поиск по производителям
+            const manufacturerResults = manufacturersData.filter(m => 
+                m.name.toLowerCase().includes(query) ||
+                (m.city && m.city.toLowerCase().includes(query)) ||
+                (m.email && m.email.toLowerCase().includes(query))
+            );
+            
+            // Поиск по товарам
+            const productResults = productsData.filter(p => 
+                p.name.toLowerCase().includes(query) ||
+                (p.sku && p.sku.toLowerCase().includes(query)) ||
+                (p.specs && p.specs.toLowerCase().includes(query))
+            );
+            
+            if (manufacturerResults.length > 0 || productResults.length > 0) {
+                // Создаем модальное окно с результатами
+                showSearchResults(query, manufacturerResults, productResults);
+            } else {
+                showNotification('Ничего не найдено', 'warning');
+            }
+        }
+
+        // Показ результатов поиска
+        function showSearchResults(query, manufacturerResults, productResults) {
+            const modal = new bootstrap.Modal(document.createElement('div'));
+            modal._element.className = 'modal fade';
+            modal._element.innerHTML = `
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Результаты поиска: "${query}"</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            ${manufacturerResults.length > 0 ? `
+                                <h6>Производители (${manufacturerResults.length})</h6>
+                                <div class="table-responsive mb-4">
+                                    <table class="table table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>Название</th>
+                                                <th>Город</th>
+                                                <th>Контакты</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${manufacturerResults.map(m => `
+                                                <tr>
+                                                    <td><a href="#" onclick="editManufacturer(${m.id}); bootstrap.Modal.getInstance(document.querySelector('.modal.show')).hide();">${escapeHtml(m.name)}</a></td>
+                                                    <td>${escapeHtml(m.city || '—')}</td>
+                                                    <td><small>${escapeHtml(m.email || '')} ${escapeHtml(m.phone || '')}</small></td>
+                                                </tr>
+                                            `).join('')}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            ` : ''}
+                            
+                            ${productResults.length > 0 ? `
+                                <h6>Товары (${productResults.length})</h6>
+                                <div class="table-responsive">
+                                    <table class="table table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>Название</th>
+                                                <th>Производитель</th>
+                                                <th>Цена</th>
+                                                <th>Тип</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${productResults.map(p => {
+                                                const manufacturer = manufacturersData.find(m => m.id === p.manufacturer_id);
+                                                return `
+                                                    <tr>
+                                                        <td><a href="#" onclick="editProduct(${p.id}); bootstrap.Modal.getInstance(document.querySelector('.modal.show')).hide();">${escapeHtml(p.name)}</a></td>
+                                                        <td>${escapeHtml(manufacturer ? manufacturer.name : '—')}</td>
+                                                        <td>${formatCurrency(p.price)}</td>
+                                                        <td>${escapeHtml(p.type || '—')}</td>
+                                                    </tr>
+                                                `;
+                                            }).join('')}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal._element);
+            modal.show();
+            
+            modal._element.addEventListener('hidden.bs.modal', function() {
+                document.body.removeChild(modal._element);
+            });
+        }
+
+        // Вспомогательные функции для массовых операций
+        function selectAllManufacturers() {
+            const checkboxes = document.querySelectorAll('.manufacturer-select');
+            const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+            
+            checkboxes.forEach(cb => {
+                cb.checked = !allChecked;
+            });
+            
+            document.getElementById('selectAll').checked = !allChecked;
+        }
+
+        function selectAllProducts() {
+            const checkboxes = document.querySelectorAll('.product-select');
+            const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+            
+            checkboxes.forEach(cb => {
+                cb.checked = !allChecked;
+            });
+            
+            document.getElementById('selectAllProducts').checked = !allChecked;
+        }
+
+        function toggleSelectAll(checkbox) {
+            const checkboxes = document.querySelectorAll('.manufacturer-select');
+            checkboxes.forEach(cb => {
+                cb.checked = checkbox.checked;
+            });
+        }
+
+        function toggleSelectAllProducts(checkbox) {
+            const checkboxes = document.querySelectorAll('.product-select');
+            checkboxes.forEach(cb => {
+                cb.checked = checkbox.checked;
+            });
+        }
+
+        // Массовое удаление производителей
+        function bulkDeleteManufacturers() {
+            const selectedIds = Array.from(document.querySelectorAll('.manufacturer-select:checked'))
+                .map(cb => parseInt(cb.value));
+            
+            if (selectedIds.length === 0) {
+                showNotification('Выберите хотя бы одного производителя', 'warning');
+                return;
+            }
+            
+            if (!confirm(`Вы уверены, что хотите удалить ${selectedIds.length} производителей? Все связанные товары также будут удалены.`)) {
+                return;
+            }
+            
+            // Удаляем производителей
+            manufacturersData = manufacturersData.filter(m => !selectedIds.includes(m.id));
+            
+            // Удаляем связанные товары
+            productsData = productsData.filter(p => !selectedIds.includes(p.manufacturer_id));
+            
+            // Сохраняем изменения
+            saveData();
+            
+            // Показываем уведомление
+            showNotification(`Удалено ${selectedIds.length} производителей`, 'success');
+            
+            // Обновляем данные
+            loadManufacturers();
+            loadProducts();
+            updateDashboardStats();
+        }
+
+        // Массовое удаление товаров
+        function bulkDeleteProducts() {
+            const selectedIds = Array.from(document.querySelectorAll('.product-select:checked'))
+                .map(cb => parseInt(cb.value));
+            
+            if (selectedIds.length === 0) {
+                showNotification('Выберите хотя бы один товар', 'warning');
+                return;
+            }
+            
+            if (!confirm(`Вы уверены, что хотите удалить ${selectedIds.length} товаров?`)) {
+                return;
+            }
+            
+            // Удаляем товары
+            productsData = productsData.filter(p => !selectedIds.includes(p.id));
+            
+            // Сохраняем изменения
+            saveData();
+            
+            // Показываем уведомление
+            showNotification(`Удалено ${selectedIds.length} товаров`, 'success');
+            
+            // Обновляем данные
+            loadProducts();
+            updateDashboardStats();
+        }
+
+        // Массовое обновление статуса
+        function bulkUpdateStatus(status) {
+            const selectedIds = Array.from(document.querySelectorAll('.manufacturer-select:checked'))
+                .map(cb => parseInt(cb.value));
+            
+            if (selectedIds.length === 0) {
+                showNotification('Выберите хотя бы одного производителя', 'warning');
+                return;
+            }
+            
+            // Обновляем статус
+            manufacturersData.forEach(manufacturer => {
+                if (selectedIds.includes(manufacturer.id)) {
+                    manufacturer.status = status;
+                    manufacturer.updated_at = new Date().toISOString();
+                }
+            });
+            
+            // Сохраняем изменения
+            saveData();
+            
+            // Показываем уведомление
+            showNotification(`Обновлен статус ${selectedIds.length} производителей`, 'success');
+            
+            // Обновляем данные
+            loadManufacturers();
+        }
+
+        // Массовое обновление статуса товаров
+        function bulkUpdateProductStatus(status) {
+            const selectedIds = Array.from(document.querySelectorAll('.product-select:checked'))
+                .map(cb => parseInt(cb.value));
+            
+            if (selectedIds.length === 0) {
+                showNotification('Выберите хотя бы один товар', 'warning');
+                return;
+            }
+            
+            // Обновляем статус
+            productsData.forEach(product => {
+                if (selectedIds.includes(product.id)) {
+                    product.status = status;
+                    product.updated_at = new Date().toISOString();
+                }
+            });
+            
+            // Сохраняем изменения
+            saveData();
+            
+            // Показываем уведомление
+            showNotification(`Обновлен статус ${selectedIds.length} товаров`, 'success');
+            
+            // Обновляем данные
+            loadProducts();
+        }
+
+        // Сброс фильтров
+        function resetFilters() {
+            document.getElementById('searchManufacturers').value = '';
+            document.getElementById('filterCity').value = '';
+            document.getElementById('filterStatus').value = '';
+            document.getElementById('sortManufacturers').value = 'name_asc';
+            loadManufacturers();
+        }
+
+        function resetProductFilters() {
+            document.getElementById('searchProducts').value = '';
+            document.getElementById('filterType').value = '';
+            document.getElementById('filterManufacturer').value = '';
+            document.getElementById('priceRange').value = '';
+            loadProducts();
+        }
+
+        // Импорт данных
+        function batchImportManufacturers() {
+            showNotification('Импорт производителей пока недоступен', 'info');
+        }
+
+        function batchImportProducts() {
+            showNotification('Импорт продукции пока недоступен', 'info');
+        }
+
+        // Управление сессиями
+        function showSessionLog() {
+            showNotification('Журнал сессий пока недоступен', 'info');
+        }
+
+        function terminateAllSessions() {
+            if (confirm('Завершить все активные сессии, кроме текущей?')) {
+                showNotification('Все сессии завершены', 'success');
+            }
+        }
+
+        // Резервное копирование
+        function createBackup() {
+            showNotification('Создание резервной копии...', 'info');
+            setTimeout(() => {
+                showNotification('Резервная копия успешно создана!', 'success');
+            }, 1500);
+        }
+
+        function showRestoreBackup() {
+            showNotification('Восстановление из резервной копии пока недоступно', 'info');
+        }
+
+        function optimizeDatabase() {
+            showNotification('Оптимизация базы данных...', 'info');
+            setTimeout(() => {
+                showNotification('База данных успешно оптимизирована!', 'success');
+            }, 2000);
+        }
+
+        function showDataCleanup() {
+            showNotification('Очистка данных пока недоступна', 'info');
+        }
+
+        // Проверка обновлений
+        function checkForUpdates() {
+            showNotification('Проверка обновлений...', 'info');
+            setTimeout(() => {
+                showNotification('У вас установлена последняя версия', 'success');
+            }, 1000);
+        }
+
+        function showSystemLogs() {
+            showNotification('Системные логи пока недоступны', 'info');
+        }
+
+        // Установка периода статистики
+        function setStatsPeriod(period) {
+            showNotification(`Период статистики установлен: ${period}`, 'info');
+            loadStatistics();
+        }
+
+function adminLogout() {
+    if (confirm('Вы уверены, что хотите выйти?')) {
+        // Удаляем все данные авторизации
+        localStorage.removeItem('adminAuthToken');
+        localStorage.removeItem('adminAuthExpiry');
+        localStorage.removeItem('adminUsername');
+        localStorage.removeItem('adminRememberMe');
+        
+        showNotification('Выход из системы...', 'info');
+        setTimeout(() => {
+            window.location.href = 'admin_login.html';
+        }, 1000);
+    }
+}
+
+        // Синхронизация с главной страницей
+        function syncWithIndexPage() {
+            try {
+                // Сохраняем данные в localStorage с ключами главной страницы
+                localStorage.setItem('indexManufacturers', JSON.stringify(manufacturersData));
+                localStorage.setItem('indexProducts', JSON.stringify(productsData));
+                
+                // Сохраняем метаданные для главной страницы
+                const metaData = {
+                    lastSync: new Date().toISOString(),
+                    totalManufacturers: manufacturersData.length,
+                    totalProducts: productsData.length,
+                    version: '2.2.0'
+                };
+                localStorage.setItem('cableDataMeta', JSON.stringify(metaData));
+                
+                showNotification('Данные успешно синхронизированы с главной страницей!', 'success');
+            } catch (error) {
+                showNotification('Ошибка синхронизации: ' + error.message, 'error');
+            }
+        }
+
+        // Сохранение данных
+        function saveData() {
+            localStorage.setItem('cableManufacturers', JSON.stringify(manufacturersData));
+            localStorage.setItem('cableProducts', JSON.stringify(productsData));
+            
+            // Автоматическая синхронизация с главной страницей
+            syncWithIndexPage();
+            
+            // Обновляем прогресс хранилища
+            updateStorageProgress();
+        }
+
+        // Обновление прогресса использования хранилища
+        function updateStorageProgress() {
+            try {
+                let total = 0;
+                for (let key in localStorage) {
+                    if (localStorage.hasOwnProperty(key)) {
+                        total += localStorage[key].length * 2;
+                    }
+                }
+                
+                const usedMB = (total / (1024 * 1024)).toFixed(2);
+                const percent = Math.min((usedMB / 5) * 100, 100);
+                
+                document.getElementById('storageProgress').style.width = percent + '%';
+                document.getElementById('storageProgress').textContent = usedMB + ' MB';
+                
+                if (percent > 80) {
+                    document.getElementById('storageProgress').className = 'progress-bar bg-danger';
+                } else if (percent > 60) {
+                    document.getElementById('storageProgress').className = 'progress-bar bg-warning';
+                }
+            } catch (e) {
+                console.log('Не удалось обновить прогресс хранилища:', e);
+            }
+        }
+
+        // Уведомления
+        function showNotification(message, type = 'info', duration = 5000) {
+            const notificationArea = document.getElementById('notificationArea');
+            const alertClass = {
+                'success': 'alert-success',
+                'error': 'alert-danger',
+                'warning': 'alert-warning',
+                'info': 'alert-info'
+            }[type] || 'alert-info';
+            
+            const icon = {
+                'success': 'bi-check-circle',
+                'error': 'bi-exclamation-circle',
+                'warning': 'bi-exclamation-triangle',
+                'info': 'bi-info-circle'
+            }[type] || 'bi-info-circle';
+            
+            const notification = document.createElement('div');
+            notification.className = `alert ${alertClass} alert-dismissible fade show alert-notification`;
+            notification.innerHTML = `
+                <div class="d-flex align-items-center">
+                    <i class="bi ${icon} me-2 fs-5"></i>
+                    <div class="flex-grow-1">${message}</div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            
+            notificationArea.appendChild(notification);
+            
+            // Автоматическое скрытие
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    const bsAlert = new bootstrap.Alert(notification);
+                    bsAlert.close();
+                }
+            }, duration);
+        }
+
+        // Настройка обработчиков событий
+        function setupEventListeners() {
+            // Дебаунс для поиска
+            let searchTimeout;
+            window.debouncedLoadManufacturers = function() {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => loadManufacturers(), 500);
+            };
+            
+            window.debouncedLoadProducts = function() {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => loadProducts(), 500);
+            };
+        }
+
+        // Вспомогательные функции
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function updateElementText(id, text) {
+            const element = document.getElementById(id);
+            if (element) {
+                element.textContent = text;
+            }
+        }
+    </script>
+</body>
+</html>

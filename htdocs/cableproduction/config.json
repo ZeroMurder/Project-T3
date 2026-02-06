@@ -1,0 +1,32 @@
+{
+  "database": {
+    "name": "cableproduction_db",
+    "version": "1.0",
+    "last_backup": null,
+    "auto_backup": true,
+    "backup_interval": 86400000
+  },
+  "site": {
+    "name": "CableProduction",
+    "description": "Агрегатор кабельной продукции",
+    "currency": "RUB",
+    "language": "ru",
+    "timezone": "Europe/Moscow"
+  },
+  "admin": {
+    "default_username": "admin",
+    "session_timeout": 3600,
+    "max_login_attempts": 5,
+    "password_min_length": 6
+  },
+  "export": {
+    "default_format": "json",
+    "include_timestamp": true,
+    "compress_files": false
+  },
+  "notifications": {
+    "enabled": true,
+    "email_notifications": false,
+    "browser_notifications": true
+  }
+}

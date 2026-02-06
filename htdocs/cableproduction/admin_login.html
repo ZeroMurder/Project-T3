@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход в админ-панель - CableProduction</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --admin-bg: #0f172a;
+            --admin-primary: #3b82f6;
+            --admin-gradient: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        }
+        
+        body {
+            background: var(--admin-bg);
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+        }
+        
+        .login-wrapper {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            background: var(--admin-bg);
+        }
+        
+        .login-container {
+            width: 100%;
+            max-width: 420px;
+            padding: 20px;
+            animation: fadeIn 0.6s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .login-card {
+            background: rgba(30, 41, 59, 0.95);
+            border-radius: 1rem;
+            padding: 2.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .login-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--admin-gradient);
+        }
+        
+        .login-logo {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+        
+        .logo-icon {
+            width: 80px;
+            height: 80px;
+            background: var(--admin-gradient);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            font-size: 2.5rem;
+            color: white;
+            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.4);
+        }
+        
+        .login-title {
+            color: white;
+            font-weight: 700;
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+            background: var(--admin-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .login-subtitle {
+            color: #94a3b8;
+            font-size: 0.95rem;
+        }
+        
+        .form-label {
+            color: #e2e8f0;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-control {
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 0.85rem 1rem;
+            border-radius: 0.75rem;
+            transition: all 0.3s;
+            font-size: 1rem;
+        }
+        
+        .form-control:focus {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--admin-primary);
+            color: white;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+            transform: translateY(-1px);
+        }
+        
+        .input-group-text {
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #94a3b8;
+            border-right: none;
+        }
+        
+        .btn-login {
+            background: var(--admin-gradient);
+            border: none;
+            color: white;
+            padding: 0.9rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            font-size: 1rem;
+            width: 100%;
+            transition: all 0.3s;
+            margin-top: 0.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-login::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.7s;
+        }
+        
+        .btn-login:hover::before {
+            left: 100%;
+        }
+        
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.4);
+        }
+        
+        .btn-login:active {
+            transform: translateY(0);
+        }
+        
+        .form-check-input:checked {
+            background-color: var(--admin-primary);
+            border-color: var(--admin-primary);
+        }
+        
+        .form-check-label {
+            color: #cbd5e1;
+        }
+        
+        .login-footer {
+            text-align: center;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #94a3b8;
+            font-size: 0.875rem;
+        }
+        
+        .alert {
+            border-radius: 0.75rem;
+            border: none;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            animation: slideDown 0.3s ease;
+        }
+        
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--admin-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 1;
+            transition: opacity 0.5s ease;
+        }
+        
+        .loading-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border-width: 4px;
+        }
+        
+        /* Анимация появления */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+    </style>
+</head>
+<body>
+    <!-- Загрузочный экран -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="spinner-border text-primary loading-spinner" role="status">
+            <span class="visually-hidden">Загрузка...</span>
+        </div>
+    </div>
+
+    <!-- Основной контент -->
+    <div class="login-wrapper">
+        <div class="login-container">
+            <div class="login-card">
+                <div class="login-logo">
+                    <div class="logo-icon pulse">
+                        <i class="bi bi-shield-check"></i>
+                    </div>
+                    <h1 class="login-title">CableProduction</h1>
+                    <p class="login-subtitle">Административная панель управления</p>
+                </div>
+                
+                <div id="loginAlert" class="alert alert-danger d-none" role="alert">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    <span id="alertMessage">Неверное имя пользователя или пароль</span>
+                </div>
+                
+                <form id="loginForm">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Имя пользователя</label>
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="bi bi-person"></i>
+                            </span>
+                            <input type="text" class="form-control" id="username" 
+                                   placeholder="Введите имя пользователя" required
+                                   autocomplete="username">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Пароль</label>
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="bi bi-lock"></i>
+                            </span>
+                            <input type="password" class="form-control" id="password" 
+                                   placeholder="Введите пароль" required
+                                   autocomplete="current-password">
+                            <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="rememberMe">
+                        <label class="form-check-label" for="rememberMe">Запомнить меня</label>
+                        <a href="#" class="float-end text-decoration-none" style="color: #60a5fa; font-size: 0.875rem;">
+                            <i class="bi bi-question-circle me-1"></i>Забыли пароль?
+                        </a>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-login" id="loginButton">
+                        <i class="bi bi-box-arrow-in-right me-2"></i>Войти в систему
+                    </button>
+                </form>
+                
+                <div class="login-footer">
+                    <p class="mb-2">Используйте <strong>admin</strong> / <strong>admin123</strong> для входа</p>
+                    <p class="mb-0 text-muted">© 2026 CableProduction • Версия 2.2.0 • <span id="currentDate"></span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Инициализация
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Страница входа загружена');
+            
+            // Устанавливаем текущую дату
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('currentDate').textContent = now.toLocaleDateString('ru-RU', options);
+            
+            // Скрываем загрузочный экран через 500мс
+            setTimeout(() => {
+                document.getElementById('loadingOverlay').classList.add('hidden');
+                console.log('Загрузочный экран скрыт');
+            }, 500);
+            
+            // Проверяем, авторизован ли пользователь
+            checkAuthStatus();
+        });
+
+        // Проверка статуса авторизации
+        function checkAuthStatus() {
+            const authToken = localStorage.getItem('adminAuthToken');
+            const authExpiry = localStorage.getItem('adminAuthExpiry');
+            
+            if (authToken && authExpiry) {
+                const now = new Date().getTime();
+                if (now < parseInt(authExpiry)) {
+                    console.log('Пользователь уже авторизован, перенаправление...');
+                    // Плавное перенаправление
+                    setTimeout(() => {
+                        window.location.href = 'admin.html';
+                    }, 100);
+                    return true;
+                } else {
+                    // Токен истек
+                    localStorage.removeItem('adminAuthToken');
+                    localStorage.removeItem('adminAuthExpiry');
+                    console.log('Токен авторизации истек');
+                }
+            }
+            return false;
+        }
+
+        // Переключение видимости пароля
+        document.getElementById('togglePassword').addEventListener('click', function() {
+            const passwordInput = document.getElementById('password');
+            const icon = this.querySelector('i');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.classList.remove('bi-eye');
+                icon.classList.add('bi-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                icon.classList.remove('bi-eye-slash');
+                icon.classList.add('bi-eye');
+            }
+        });
+
+        // Обработка формы входа
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            const rememberMe = document.getElementById('rememberMe').checked;
+            const loginButton = document.getElementById('loginButton');
+            const alert = document.getElementById('loginAlert');
+            
+            // Сброс предыдущих ошибок
+            alert.classList.add('d-none');
+            document.getElementById('username').classList.remove('is-invalid');
+            document.getElementById('password').classList.remove('is-invalid');
+            
+            // Валидация
+            if (!username || !password) {
+                showAlert('Заполните все поля', 'warning');
+                return;
+            }
+            
+            // Блокируем кнопку
+            loginButton.disabled = true;
+            loginButton.innerHTML = '<i class="bi bi-arrow-clockwise me-2"></i>Проверка...';
+            
+            // Имитация проверки (в реальном приложении здесь будет AJAX запрос)
+            setTimeout(() => {
+                // Проверяем учетные данные
+                if ((username === 'admin' && password === 'admin123') || 
+                    (username === 'administrator' && password === 'admin')) {
+                    
+                    // Генерируем токен авторизации
+                    const authToken = generateAuthToken();
+                    const now = new Date().getTime();
+                    
+                    // Устанавливаем время жизни токена
+                    let expiryTime;
+                    if (rememberMe) {
+                        // 30 дней
+                        expiryTime = now + (30 * 24 * 60 * 60 * 1000);
+                    } else {
+                        // 8 часов
+                        expiryTime = now + (8 * 60 * 60 * 1000);
+                    }
+                    
+                    // Сохраняем в localStorage
+                    localStorage.setItem('adminAuthToken', authToken);
+                    localStorage.setItem('adminAuthExpiry', expiryTime.toString());
+                    localStorage.setItem('adminUsername', username);
+                    localStorage.setItem('adminRememberMe', rememberMe.toString());
+                    
+                    console.log('Авторизация успешна, токен сохранен');
+                    
+                    // Показываем успешное сообщение
+                    showAlert('Авторизация успешна! Перенаправление...', 'success');
+                    
+                    // Меняем текст кнопки
+                    loginButton.innerHTML = '<i class="bi bi-check-circle me-2"></i>Успешно!';
+                    
+                    // Плавное перенаправление через 1.5 секунды
+                    setTimeout(() => {
+                        window.location.href = 'admin.html';
+                    }, 1500);
+                    
+                } else {
+                    // Неверные учетные данные
+                    showAlert('Неверное имя пользователя или пароль', 'error');
+                    document.getElementById('username').classList.add('is-invalid');
+                    document.getElementById('password').classList.add('is-invalid');
+                    
+                    // Встряхиваем форму
+                    document.querySelector('.login-card').style.animation = 'none';
+                    setTimeout(() => {
+                        document.querySelector('.login-card').style.animation = 'shake 0.5s';
+                    }, 10);
+                    
+                    // Разблокируем кнопку
+                    loginButton.disabled = false;
+                    loginButton.innerHTML = '<i class="bi bi-box-arrow-in-right me-2"></i>Войти в систему';
+                }
+            }, 1000); // Имитация задержки сети
+        });
+
+        // Генерация токена авторизации
+        function generateAuthToken() {
+            return 'admin_' + Math.random().toString(36).substr(2) + 
+                   '_' + Date.now().toString(36) + 
+                   '_' + Math.random().toString(36).substr(2);
+        }
+
+        // Показ уведомлений
+        function showAlert(message, type = 'error') {
+            const alert = document.getElementById('loginAlert');
+            const alertMessage = document.getElementById('alertMessage');
+            
+            alertMessage.textContent = message;
+            
+            // Устанавливаем класс в зависимости от типа
+            alert.classList.remove('alert-danger', 'alert-success', 'alert-warning');
+            
+            switch(type) {
+                case 'success':
+                    alert.classList.add('alert-success');
+                    break;
+                case 'warning':
+                    alert.classList.add('alert-warning');
+                    break;
+                default:
+                    alert.classList.add('alert-danger');
+            }
+            
+            alert.classList.remove('d-none');
+            
+            // Автоскрытие для успешных сообщений
+            if (type === 'success') {
+                setTimeout(() => {
+                    alert.classList.add('d-none');
+                }, 3000);
+            }
+        }
+
+        // Добавляем CSS для анимации встряхивания
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+                20%, 40%, 60%, 80% { transform: translateX(5px); }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Автозаполнение для тестирования
+        if (window.location.href.includes('test')) {
+            document.getElementById('username').value = 'admin';
+            document.getElementById('password').value = 'admin123';
+        }
+    </script>
+</body>
+</html>

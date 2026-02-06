@@ -1,0 +1,14 @@
+# Enable rewrite engine
+RewriteEngine On
+
+# Redirect root to frontend
+RewriteRule ^$ cableproduction/index.html [L]
+
+# Redirect to admin for all admin files
+RewriteRule ^admin/(.*)$ admin/$1 [L]
+
+# Redirect to backend for API calls
+RewriteRule ^backend/(.*)$ backend/$1 [L]
+
+# Set default index files
+DirectoryIndex index.html index.php

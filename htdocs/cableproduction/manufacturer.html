@@ -1,0 +1,173 @@
+// Конфигурация
+const API_BASE = '/cableproduction/backend/api/';
+
+// DOM элементы
+const manufacturerDetail = document.getElementById('manufacturerDetail');
+
+// Инициализация
+document.addEventListener('DOMContentLoaded', async function() {
+    console.log('📄 Инициализация страницы производителя...');
+    
+    const manufacturerId = localStorage.getItem('selectedManufacturerId');
+    
+    if (!manufacturerId) {
+        window.location.href = 'index.html';
+        return;
+    }
+    
+    try {
+        // Загрузка данных производителя
+        const [manResponse, prodResponse] = await Promise.all([
+            fetch(`${API_BASE}manufacturers.php?id=${manufacturerId}`, {
+                headers: { 'Accept': 'application/json' }
+            }),
+            fetch(API_BASE + 'products.php', {
+                headers: { 'Accept': 'application/json' }
+            })
+        ]);
+        
+        const manData = await manResponse.json();
+        const prodData = await prodResponse.json();
+        
+        if (manData.success && prodData.success) {
+            const manufacturer = manData.data;
+            const products = prodData.data.filter(p => p.manufacturer_id == manufacturerId);
+            
+            renderManufacturerDetail(manufacturer, products);
+        } else {
+            throw new Error('Не удалось загрузить данные');
+        }
+        
+    } catch (error) {
+        console.error('❌ Ошибка:', error);
+        manufacturerDetail.innerHTML = `
+            <div class="alert alert-danger">
+                <i class="bi bi-exclamation-triangle me-2"></i>
+                Ошибка загрузки данных: ${error.message}
+            </div>
+            <a href="index.html" class="btn btn-primary mt-3">
+                <i class="bi bi-arrow-left me-2"></i>Вернуться на главную
+            </a>
+        `;
+    }
+});
+
+// Отображение детальной информации
+function renderManufacturerDetail(manufacturer, products) {
+    console.log('🎨 Отображение детальной информации...');
+    
+    // Форматирование контактов
+    const contacts = [];
+    if (manufacturer.phone) {
+        contacts.push(`<div class="mb-2"><i class="bi bi-telephone text-primary me-2"></i> ${manufacturer.phone}</div>`);
+    }
+    if (manufacturer.email) {
+        contacts.push(`<div class="mb-2"><i class="bi bi-envelope text-primary me-2"></i> ${manufacturer.email}</div>`);
+    }
+    if (manufacturer.website) {
+        contacts.push(`<div class="mb-2"><i class="bi bi-globe text-primary me-2"></i> ${manufacturer.website}</div>`);
+    }
+    
+    // Группировка продуктов по типам
+    const productsByType = {};
+    products.forEach(product => {
+        const type = product.type || 'Другие';
+        if (!productsByType[type]) {
+            productsByType[type] = [];
+        }
+        productsByType[type].push(product);
+    });
+    
+    let html = `
+        <div class="row">
+            <div class="col-lg-4 mb-4">
+                <div class="card border-0 shadow-lg">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-4">
+                            <div class="bg-primary rounded-circle p-3 me-3">
+                                <i class="bi bi-building text-white fs-2"></i>
+                            </div>
+                            <div>
+                                <h2 class="h3 mb-1">${manufacturer.name}</h2>
+                                <div class="text-muted">
+                                    <i class="bi bi-geo-alt me-1"></i>
+                                    ${manufacturer.city || 'Город не указан'}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        ${contacts.length > 0 ? `
+                            <div class="mb-4">
+                                <h5 class="mb-3"><i class="bi bi-telephone-forward me-2"></i>Контакты</h5>
+                                ${contacts.join('')}
+                            </div>
+                        ` : ''}
+                        
+                        ${manufacturer.description ? `
+                            <div class="mb-4">
+                                <h5 class="mb-3"><i class="bi bi-info-circle me-2"></i>Описание</h5>
+                                <p class="text-muted">${manufacturer.description}</p>
+                            </div>
+                        ` : ''}
+                        
+                        <div class="d-grid gap-2">
+                            <a href="index.html" class="btn btn-outline-primary">
+                                <i class="bi bi-arrow-left me-2"></i>Назад к списку
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-lg mb-4">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h3 class="mb-0">
+                                <i class="bi bi-box-seam me-2 text-primary"></i>
+                                Продукция (${products.length})
+                            </h3>
+                        </div>
+    `;
+    
+    // Отобразить продукты по типам
+    Object.entries(productsByType).forEach(([type, typeProducts]) => {
+        html += `
+            <div class="mb-4">
+                <h5 class="mb-3 text-primary">${type}</h5>
+                <div class="row g-3">
+        `;
+        
+        typeProducts.forEach(product => {
+            html += `
+                <div class="col-md-6">
+                    <div class="card border h-100">
+                        <div class="card-body">
+                            <h6 class="card-title">${product.name}</h6>
+                            ${product.specs ? `<p class="card-text small text-muted">${product.specs}</p>` : ''}
+                            ${product.price ? `
+                                <div class="mt-2">
+                                    <span class="badge bg-success">${product.price} руб./${product.unit || 'м'}</span>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        html += `
+                </div>
+            </div>
+        `;
+    });
+    
+    html += `
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    manufacturerDetail.innerHTML = html;
+}

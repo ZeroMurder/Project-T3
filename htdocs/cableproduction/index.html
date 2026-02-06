@@ -1,0 +1,2713 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CableProduction - Агрегатор кабельной продукции</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    
+    <!-- Кастомные стили (добавьте этот файл отдельно) -->
+    <link rel="stylesheet" href="css/styles.css">
+    
+    <!-- Альтернативно, можно оставить встроенные стили -->
+    <style id="custom-styles">
+        /* Сюда вставьте стили из styles.css */
+    </style>
+</head>
+<body>
+    <!-- Уведомления -->
+    <div id="notificationArea" class="position-fixed" style="z-index: 10000; top: 100px; right: 20px;"></div>
+    
+    <!-- Верхняя зеленая панель -->
+    <div class="top-green-bar">
+        <div class="container">
+            <div class="top-contacts">
+                <a href="mailto:info@cableproduction.ru"><i class="bi bi-envelope"></i> info@cableproduction.ru</a>
+            </div>
+            <div class="top-social">
+                <a href="#" class="text-white me-2"><i class="bi bi-telegram"></i></a>
+                <a href="#" class="text-white me-2"><i class="bi bi-whatsapp"></i></a>
+                <a href="https://github.com/ZeroMurder" class="text-white me-2" target="_blank"><i class="bi bi-github"></i></a>
+                <a href="#" class="text-white"><i class="bi bi-vk"></i></a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Навигация -->
+    <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="bi bi-lightning-charge-fill me-2"></i>Cable<span>Production</span>
+            </a>
+            
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon text-white">
+                    <i class="bi bi-list"></i>
+                </span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#"><i class="bi bi-house"></i> Главная</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#catalog"><i class="bi bi-grid"></i> Каталог</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#manufacturers"><i class="bi bi-buildings"></i> Производители</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#about"><i class="bi bi-info-circle"></i> О нас</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#contacts"><i class="bi bi-geo-alt"></i> Контакты</a>
+                    </li>
+                    <li class="nav-item ms-2">
+                        <button class="nav-link" onclick="showAdminLogin()" style="background-color: var(--green-dark); border: none; color: inherit; cursor: pointer;">
+                            <i class="bi bi-shield-lock"></i> Админ-панель
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Главный баннер -->
+    <section class="hero-section fade-in">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-7">
+                    <h1 class="hero-title">Кабельная продукция от ведущих производителей</h1>
+                    <p class="hero-subtitle">Агрегатор кабельной продукции с полной информацией о производителях, технических характеристиках и ценах. Более 1000 наименований в каталоге.</p>
+                    <div class="d-flex flex-wrap gap-3">
+                        <button class="btn btn-green" onclick="loadAllProducts()">Перейти в каталог</button>
+                        <button class="btn btn-outline-light" onclick="downloadPriceList()">Скачать прайс-лист</button>
+                    </div>
+                </div>
+                <div class="col-lg-5 d-none d-lg-block">
+                    <div class="text-center">
+                        <i class="bi bi-lightning-charge-fill" style="font-size: 200px; color: rgba(16, 185, 129, 0.2);"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Каталог продукции -->
+    <section id="catalog" class="py-5">
+        <div class="container">
+            <h2 class="section-title">Каталог продукции</h2>
+            
+            <div class="row g-4 mb-5">
+                <div class="col-md-3">
+                    <div class="category-card" onclick="filterByType('Силовой')">
+                        <div class="category-icon">
+                            <i class="bi bi-lightning"></i>
+                        </div>
+                        <h4>Силовые кабели</h4>
+                        <p class="text-muted">ВВГ, АВВГ, СИП и другие</p>
+                        <div class="mt-2">
+                            <small id="count-silovye" class="badge bg-green-primary">0 товаров</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="category-card" onclick="filterByType('Оптический')">
+                        <div class="category-icon">
+                            <i class="bi bi-wifi"></i>
+                        </div>
+                        <h4>Оптические кабели</h4>
+                        <p class="text-muted">Волоконно-оптические линии связи</p>
+                        <div class="mt-2">
+                            <small id="count-optika" class="badge bg-green-primary">0 товаров</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="category-card" onclick="filterByType('Витая пара')">
+                        <div class="category-icon">
+                            <i class="bi bi-hdd-network"></i>
+                        </div>
+                        <h4>Сетевые кабели</h4>
+                        <p class="text-muted">Витая пара, патч-корды</p>
+                        <div class="mt-2">
+                            <small id="count-setevye" class="badge bg-green-primary">0 товаров</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="category-card" onclick="filterByType('Коаксиальный')">
+                        <div class="category-icon">
+                            <i class="bi bi-tv"></i>
+                        </div>
+                        <h4>Коаксиальные кабели</h4>
+                        <p class="text-muted">Для телевидения и видеонаблюдения</p>
+                        <div class="mt-2">
+                            <small id="count-koaks" class="badge bg-green-primary">0 товаров</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <h3 class="mb-4" style="color: var(--green-light);">Популярные товары</h3>
+            
+            <!-- Лоадер для товаров -->
+            <div class="loader" id="productsLoader">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Загрузка...</span>
+                </div>
+                <p class="mt-3">Загрузка товаров...</p>
+            </div>
+            
+            <!-- Контейнер для товаров -->
+            <div class="row g-4" id="productsContainer">
+                <!-- Товары будут загружены через JavaScript -->
+            </div>
+            
+            <!-- Кнопка для загрузки всех товаров -->
+            <div class="text-center mt-5">
+                <button class="btn btn-green" onclick="loadAllProducts()">
+                    <i class="bi bi-eye me-2"></i>Показать все товары
+                </button>
+            </div>
+        </div>
+    </section>
+    
+    <!-- О нас -->
+    <section id="about" class="py-5" style="background-color: var(--black-secondary);">
+        <div class="container">
+            <h2 class="section-title center text-center">О нашем агрегаторе</h2>
+            <p class="text-center mb-5" style="max-width: 800px; margin: 0 auto; color: var(--text-gray);">
+                Мы предоставляем полную информацию о кабельной продукции от ведущих российских и зарубежных производителей. 
+                Наш агрегатор помогает быстро найти нужный товар, сравнить характеристики и цены. 
+                Все данные обновляются в реальном времени через админ-панель.
+            </p>
+            
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="feature-box">
+                        <i class="bi bi-search"></i>
+                        <h4>Удобный поиск</h4>
+                        <p>Фильтрация по типу, производителю, характеристикам и цене. Быстрый поиск нужного кабеля.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-box">
+                        <i class="bi bi-clipboard-data"></i>
+                        <h4>Актуальные данные</h4>
+                        <p>Данные синхронизируются с админ-панелью. Все изменения отображаются мгновенно.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-box">
+                        <i class="bi bi-graph-up"></i>
+                        <h4>Реальные цены</h4>
+                        <p>Цены обновляются ежедневно. Сравнение цен от разных поставщиков и производителей.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Статистика в реальном времени -->
+            <div class="row mt-5">
+                <div class="col-md-3 col-6 text-center">
+                    <div class="display-4 fw-bold text-green-primary" id="statsProducts">0</div>
+                    <div class="text-muted">Товаров в каталоге</div>
+                </div>
+                <div class="col-md-3 col-6 text-center">
+                    <div class="display-4 fw-bold text-green-primary" id="statsManufacturers">0</div>
+                    <div class="text-muted">Производителей</div>
+                </div>
+                <div class="col-md-3 col-6 text-center">
+                    <div class="display-4 fw-bold text-green-primary" id="statsCities">0</div>
+                    <div class="text-muted">Городов</div>
+                </div>
+                <div class="col-md-3 col-6 text-center">
+                    <div class="display-4 fw-bold text-green-primary" id="statsTypes">0</div>
+                    <div class="text-muted">Типов кабеля</div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Производители -->
+    <section id="manufacturers" class="py-5">
+        <div class="container">
+            <h2 class="section-title">Наши производители</h2>
+            
+            <!-- Лоадер для производителей -->
+            <div class="loader" id="manufacturersLoader">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Загрузка...</span>
+                </div>
+                <p class="mt-3">Загрузка производителей...</p>
+            </div>
+            
+            <!-- Контейнер для производителей -->
+            <div class="row g-4" id="manufacturersContainer">
+                <!-- Производители будут загружены через JavaScript -->
+            </div>
+        </div>
+    </section>
+    
+    <!-- Карта производителей -->
+    <section id="manufacturersMap" class="py-5" style="background-color: var(--black-secondary);">
+        <div class="container">
+            <h2 class="section-title center text-center">География производителей</h2>
+            <div class="map-placeholder">
+                <i class="bi bi-map"></i>
+                <h4 class="mb-3" style="color: var(--green-primary);">Интерактивная карта производителей</h4>
+                <p class="mb-4" style="color: var(--text-gray); max-width: 600px;">
+                    На карте отображены географические расположения заводов-производителей кабельной продукции.
+                    Данные загружаются из базы данных в реальном времени.
+                </p>
+                <div class="row g-3 mt-3" id="citiesStats">
+                    <!-- Статистика по городам будет загружена через JavaScript -->
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Подвал -->
+    <footer class="footer" id="contacts">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-lg-4">
+                    <h4 class="footer-title">CableProduction</h4>
+                    <p>Агрегатор кабельной продукции. Полная информация о производителях, технических характеристиках и ценах на кабельную продукцию. Данные обновляются в реальном времени.</p>
+                    <div class="mt-4">
+                        <a href="#" class="btn btn-outline-light me-2"><i class="bi bi-telegram"></i></a>
+                        <a href="#" class="btn btn-outline-light me-2"><i class="bi bi-whatsapp"></i></a>
+                        <a href="https://github.com/ZeroMurder" class="btn btn-outline-light me-2" target="_blank"><i class="bi bi-github"></i></a>
+                        <button class="btn btn-outline-light" onclick="showDataStatus()">
+                            <i class="bi bi-database me-1"></i>Статус данных
+                        </button>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-6">
+                    <h5 class="footer-title">Каталог</h5>
+                    <ul class="footer-links" id="catalogLinks">
+                        <!-- Ссылки будут сгенерированы через JavaScript -->
+                    </ul>
+                </div>
+                <div class="col-lg-2 col-md-6">
+                    <h5 class="footer-title">Информация</h5>
+                    <ul class="footer-links">
+                        <li><a href="#" onclick="loadAboutSection()">О компании</a></li>
+                        <li><a href="#contacts">Контакты</a></li>
+                        <li><a href="#" onclick="showDeliveryInfo()">Доставка</a></li>
+                        <li><a href="#" onclick="showPaymentInfo()">Оплата</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-4">
+                    <h5 class="footer-title">Контакты</h5>
+                    <ul class="footer-links">
+                        <li><i class="bi bi-geo-alt me-2"></i> project-web-site</li>
+                        <li><i class="bi bi-envelope me-2"></i> test@gmail.com</li>
+                        <li><i class="bi bi-database me-2"></i> Данные обновлены: <span id="lastUpdate">сегодня</span></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom text-center">
+                <p>© 2026 CableProduction. Все права защищены.</p>
+                <p class="small text-muted">Агрегатор кабельной продукции | Данные синхронизируются с админ-панелью</p>
+                <p class="small text-muted mt-1">
+                    <span id="dataStats">Загружено 0 товаров от 0 производителей</span> | 
+                    <a href="#" class="text-muted" onclick="refreshData()">Обновить данные</a>
+                </p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Модальное окно админ-панели -->
+    <div class="modal fade" id="adminLoginModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content admin-modal-content">
+                <div class="modal-header admin-modal-header">
+                    <h5 class="modal-title w-100 text-center">
+                        <i class="bi bi-shield-lock me-2"></i>Вход в админ-панель
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body admin-modal-body">
+                    <div class="admin-logo">
+                        <i class="bi bi-shield-check"></i>
+                        <h4 style="color: var(--green-primary);">CableProduction Admin</h4>
+                    </div>
+                    
+                    <form id="adminLoginForm" onsubmit="return authenticateAdmin(event)">
+                        <div class="mb-4">
+                            <label class="admin-input-label">Логин администратора</label>
+                            <input type="text" 
+                                   class="form-control admin-input" 
+                                   id="adminUsername" 
+                                   placeholder="Введите логин" 
+                                   required>
+                            <div class="admin-error" id="usernameError">Неверный логин</div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="admin-input-label">Пароль</label>
+                            <input type="password" 
+                                   class="form-control admin-input" 
+                                   id="adminPassword" 
+                                   placeholder="Введите пароль" 
+                                   required>
+                            <div class="admin-error" id="passwordError">Неверный пароль</div>
+                        </div>
+                        
+                        <div class="mb-4 form-check">
+                            <input type="checkbox" class="form-check-input" id="rememberMe">
+                            <label class="form-check-label" for="rememberMe" style="color: var(--text-gray);">
+                                Запомнить меня
+                            </label>
+                        </div>
+                        
+                        <button type="submit" class="btn admin-btn">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>Войти
+                        </button>
+                    </form>
+                    
+                    <div class="security-badge">
+                        <i class="bi bi-shield-check me-1"></i>
+                        Защищено SHA-256 шифрованием
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Экран успешного входа -->
+    <div class="login-success" id="loginSuccess">
+        <div class="success-content">
+            <i class="bi bi-shield-check"></i>
+            <h2 style="color: var(--green-primary); margin-bottom: 20px;">Доступ разрешен!</h2>
+            <p style="color: var(--text-gray);">Перенаправление в админ-панель...</p>
+            <div class="spinner-border text-primary mt-3" role="status"></div>
+        </div>
+    </div>
+    
+    <!-- Модальное окно статуса данных -->
+    <div class="modal fade" id="dataStatusModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-database me-2"></i>Статус данных системы</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <h6>Источник данных:</h6>
+                        <p>Данные загружаются из локальной базы данных (localStorage), которая синхронизирована с админ-панелью.</p>
+                    </div>
+                    <div class="mb-3">
+                        <h6>Статистика:</h6>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Товаров в каталоге
+                                <span class="badge bg-primary rounded-pill" id="modalProductsCount">0</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Производителей
+                                <span class="badge bg-success rounded-pill" id="modalManufacturersCount">0</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Активных товаров
+                                <span class="badge bg-info rounded-pill" id="modalActiveProducts">0</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Последнее обновление
+                                <span class="badge bg-warning rounded-pill" id="modalLastUpdate">-</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                    <button type="button" class="btn btn-primary" onclick="refreshData()">
+                        <i class="bi bi-arrow-clockwise me-2"></i>Обновить данные
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Модальное окно деталей товара -->
+    <div class="modal fade" id="productDetailModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="productDetailTitle">Детали товара</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="productDetailBody">
+                    <!-- Детали товара будут загружены через JavaScript -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                    <button type="button" class="btn btn-primary" onclick="requestPrice()">
+                        <i class="bi bi-cart me-2"></i>Запросить цену
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+       // Глобальные переменные для хранения данных
+        let allProducts = [];
+        let allManufacturers = [];
+        let dataLoaded = false;
+        let lastUpdateTime = null;
+        let isAdminLoggedIn = false;
+        
+        // Ключи для localStorage
+        const PRODUCTS_KEY = 'cableProducts';
+        const MANUFACTURERS_KEY = 'cableManufacturers';
+        const ADMIN_CREDENTIALS_KEY = 'adminAuth';
+        const DATABASE_BACKUP_KEY = 'databaseBackup';
+        const ADMIN_PASSWORD_HASH_KEY = 'adminPasswordHash';
+        const DEFAULT_PASSWORD_HASH = '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9';
+        
+        // Учетные данные
+        const ADMIN_CREDENTIALS = {
+            username: 'admin'
+            // Пароль теперь хранится в хэшированном виде
+        };
+        
+        // Инициализация при загрузке страницы
+        document.addEventListener('DOMContentLoaded', function() {
+            // Плавная прокрутка для ссылок меню
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    const targetId = this.getAttribute('href');
+                    if(targetId === '#') return;
+                    
+                    const targetElement = document.querySelector(targetId);
+                    if(targetElement) {
+                        window.scrollTo({
+                            top: targetElement.offsetTop - 80,
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+            
+            // Анимация элементов при прокрутке
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if(entry.isIntersecting) {
+                        entry.target.classList.add('fade-in');
+                    }
+                });
+            }, observerOptions);
+            
+            document.querySelectorAll('section').forEach(section => {
+                observer.observe(section);
+            });
+            
+            // Инициализация хэша пароля по умолчанию
+            initializeDefaultPassword();
+            
+            // Загрузка данных
+            loadData();
+            
+            // Обновление времени последнего обновления
+            updateLastUpdateTime();
+            
+            // Проверка сохраненной сессии администратора
+            checkAdminSession();
+            
+            // Периодическая проверка обновлений данных (каждые 30 секунд)
+            setInterval(checkForUpdates, 30000);
+        });
+async function hashPassword(password) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(password);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    return hashHex;
+}
+
+// Инициализация хэша пароля по умолчанию (БЕЗ ПАРОЛЯ В КОДЕ!)
+function initializeDefaultPassword() {
+    try {
+        // Проверяем, есть ли уже сохраненный хэш
+        const storedHash = localStorage.getItem(ADMIN_PASSWORD_HASH_KEY);
+        
+        if (!storedHash) {
+            // Сохраняем ПРЕДВАРИТЕЛЬНО ВЫЧИСЛЕННЫЙ хэш пароля по умолчанию
+            localStorage.setItem(ADMIN_PASSWORD_HASH_KEY, DEFAULT_PASSWORD_HASH);
+            
+            console.log('Хэш пароля по умолчанию установлен');
+        }
+    } catch (error) {
+        console.error('Ошибка при инициализации пароля:', error);
+    }
+}
+    
+        // Функция для показа модального окна админ-панели
+        function showAdminLogin() {
+            const modal = new bootstrap.Modal(document.getElementById('adminLoginModal'));
+            modal.show();
+            
+            // Сброс ошибок
+            document.getElementById('usernameError').style.display = 'none';
+            document.getElementById('passwordError').style.display = 'none';
+            
+            // Очистка полей
+            document.getElementById('adminUsername').value = '';
+            document.getElementById('adminPassword').value = '';
+        }
+        
+        // Функция аутентификации администратора
+        async function authenticateAdmin(event) {
+            event.preventDefault();
+            
+            const username = document.getElementById('adminUsername').value;
+            const password = document.getElementById('adminPassword').value;
+            const rememberMe = document.getElementById('rememberMe').checked;
+            
+            // Сброс ошибок
+            document.getElementById('usernameError').style.display = 'none';
+            document.getElementById('passwordError').style.display = 'none';
+            
+            try {
+                // Получаем сохраненный хэш пароля
+                const storedPasswordHash = localStorage.getItem(ADMIN_PASSWORD_HASH_KEY);
+                
+                // Хэшируем введенный пароль
+                const hashedPassword = await hashPassword(password);
+                
+                // Проверка учетных данных
+                if (username === ADMIN_CREDENTIALS.username && hashedPassword === storedPasswordHash) {
+                    // Успешная аутентификация
+                    isAdminLoggedIn = true;
+                    
+                    if (rememberMe) {
+                        // Сохраняем сессию
+                        const sessionData = {
+                            username: username,
+                            timestamp: Date.now(),
+                            expires: Date.now() + (24 * 60 * 60 * 1000) // 24 часа
+                        };
+                        localStorage.setItem(ADMIN_CREDENTIALS_KEY, JSON.stringify(sessionData));
+                    }
+                    
+                    // Закрываем модальное окно
+                    bootstrap.Modal.getInstance(document.getElementById('adminLoginModal')).hide();
+                    
+                    // Показываем экран успеха
+                    document.getElementById('loginSuccess').style.display = 'flex';
+                    
+                    // Перенаправление в админ-панель через 2 секунды
+                    setTimeout(() => {
+                        document.getElementById('loginSuccess').style.display = 'none';
+                        openAdminDashboard();
+                    }, 2000);
+                    
+                    return true;
+                } else {
+                    // Неверные учетные данные
+                    if (username !== ADMIN_CREDENTIALS.username) {
+                        document.getElementById('usernameError').style.display = 'block';
+                    }
+                    if (hashedPassword !== storedPasswordHash) {
+                        document.getElementById('passwordError').style.display = 'block';
+                    }
+                    
+                    // Анимация ошибки
+                    const form = document.getElementById('adminLoginForm');
+                    form.classList.add('shake-animation');
+                    setTimeout(() => {
+                        form.classList.remove('shake-animation');
+                    }, 500);
+                    
+                    return false;
+                }
+            } catch (error) {
+                console.error('Ошибка при аутентификации:', error);
+                showNotification('Ошибка при проверке пароля', 'error');
+                return false;
+            }
+        }
+        
+        // Проверка сохраненной сессии администратора
+        function checkAdminSession() {
+            try {
+                const savedSession = localStorage.getItem(ADMIN_CREDENTIALS_KEY);
+                if (savedSession) {
+                    const session = JSON.parse(savedSession);
+                    
+                    // Проверяем, не устарела ли сессия
+                    if (session.expires > Date.now()) {
+                        isAdminLoggedIn = true;
+                    } else {
+                        // Удаляем устаревшую сессию
+                        localStorage.removeItem(ADMIN_CREDENTIALS_KEY);
+                    }
+                }
+            } catch (error) {
+                console.error('Ошибка при проверке сессии:', error);
+            }
+        }
+        
+        // Открытие админ-панели
+        function openAdminDashboard() {
+            // Создаем админ-панель
+            const adminPanel = `
+                <div id="adminDashboard" class="admin-dashboard">
+                    <div class="container-fluid">
+                        <div class="row">
+                            <!-- Сайдбар -->
+                            <div class="col-md-3 col-lg-2 admin-sidebar">
+                                <div class="admin-logo mb-4">
+                                    <i class="bi bi-shield-check"></i>
+                                    <h5 style="color: var(--green-primary);">CableProduction</h5>
+                                    <small class="text-muted">Админ-панель</small>
+                                </div>
+                                
+                                <nav class="admin-nav">
+                                    <a href="#" class="admin-nav-link active" onclick="showAdminSection(event, 'dashboard')">
+                                        <i class="bi bi-speedometer2 me-2"></i>Дашборд
+                                    </a>
+                                    <a href="#" class="admin-nav-link" onclick="showAdminSection(event, 'products')">
+                                        <i class="bi bi-box-seam me-2"></i>Товары
+                                    </a>
+                                    <a href="#" class="admin-nav-link" onclick="showAdminSection(event, 'manufacturers')">
+                                        <i class="bi bi-buildings me-2"></i>Производители
+                                    </a>
+                                    <a href="#" class="admin-nav-link" onclick="showAdminSection(event, 'database')">
+                                        <i class="bi bi-database me-2"></i>База данных
+                                    </a>
+                                    <a href="#" class="admin-nav-link" onclick="showAdminSection(event, 'settings')">
+                                        <i class="bi bi-gear me-2"></i>Настройки
+                                    </a>
+                                    <hr class="border-secondary my-3">
+                                    <a href="#" class="admin-nav-link" onclick="closeAdminDashboard()">
+                                        <i class="bi bi-box-arrow-left me-2"></i>Выйти
+                                    </a>
+                                </nav>
+                            </div>
+                            
+                            <!-- Основной контент -->
+                            <div class="col-md-9 col-lg-10 admin-content">
+                                <!-- Дашборд -->
+                                <div id="adminDashboardContent" class="admin-section">
+                                    <h2 class="mb-4"><i class="bi bi-speedometer2 me-2"></i>Дашборд</h2>
+                                    
+                                    <div class="data-stats">
+                                        <div class="stat-card">
+                                            <div class="number" id="adminTotalProducts">0</div>
+                                            <div class="label">Всего товаров</div>
+                                        </div>
+                                        <div class="stat-card">
+                                            <div class="number" id="adminActiveProducts">0</div>
+                                            <div class="label">Активных товаров</div>
+                                        </div>
+                                        <div class="stat-card">
+                                            <div class="number" id="adminTotalManufacturers">0</div>
+                                            <div class="label">Производителей</div>
+                                        </div>
+                                        <div class="stat-card">
+                                            <div class="number" id="adminCategories">0</div>
+                                            <div class="label">Категорий</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="database-actions">
+                                        <button class="btn admin-btn" onclick="backupDatabase()">
+                                            <i class="bi bi-save me-2"></i>Создать резервную копию
+                                        </button>
+                                        <button class="btn btn-warning" onclick="showImportModal()">
+                                            <i class="bi bi-upload me-2"></i>Импорт данных
+                                        </button>
+                                        <button class="btn btn-success" onclick="exportToJSON()">
+                                            <i class="bi bi-download me-2"></i>Экспорт в JSON
+                                        </button>
+                                        <button class="btn btn-info" onclick="exportToSQL()">
+                                            <i class="bi bi-filetype-sql me-2"></i>Экспорт в SQL
+                                        </button>
+                                    </div>
+                                    
+                                    <div class="export-section">
+                                        <h5 class="mb-3">Быстрые действия</h5>
+                                        <div class="d-flex flex-wrap gap-2">
+                                            <button class="btn btn-primary" onclick="showAddProductModal()">
+                                                <i class="bi bi-plus-circle me-2"></i>Добавить товар
+                                            </button>
+                                            <button class="btn btn-primary" onclick="showAddManufacturerModal()">
+                                                <i class="bi bi-building-add me-2"></i>Добавить производителя
+                                            </button>
+                                            <button class="btn btn-success" onclick="syncWithMainSite()">
+                                                <i class="bi bi-arrow-clockwise me-2"></i>Синхронизировать с сайтом
+                                            </button>
+                                            <button class="btn btn-danger" onclick="resetDatabase()">
+                                                <i class="bi bi-trash me-2"></i>Сбросить базу данных
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Товары -->
+                                <div id="adminProductsContent" class="admin-section" style="display: none;">
+                                    <div class="d-flex justify-content-between align-items-center mb-4">
+                                        <h2><i class="bi bi-box-seam me-2"></i>Управление товарами</h2>
+                                        <button class="btn admin-btn" onclick="showAddProductModal()">
+                                            <i class="bi bi-plus-circle me-2"></i>Добавить товар
+                                        </button>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <input type="text" class="admin-search" placeholder="Поиск товаров..." 
+                                               onkeyup="searchProducts(this.value)">
+                                    </div>
+                                    
+                                    <div class="table-responsive">
+                                        <table class="table admin-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>ID</th>
+                                                    <th>Название</th>
+                                                    <th>Тип</th>
+                                                    <th>Цена</th>
+                                                    <th>Производитель</th>
+                                                    <th>Статус</th>
+                                                    <th>Действия</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="productsTableBody">
+                                                <!-- Товары будут загружены через JavaScript -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                
+                                <!-- Производители -->
+                                <div id="adminManufacturersContent" class="admin-section" style="display: none;">
+                                    <div class="d-flex justify-content-between align-items-center mb-4">
+                                        <h2><i class="bi bi-buildings me-2"></i>Управление производителями</h2>
+                                        <button class="btn admin-btn" onclick="showAddManufacturerModal()">
+                                            <i class="bi bi-plus-circle me-2"></i>Добавить производителя
+                                        </button>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <input type="text" class="admin-search" placeholder="Поиск производителей..." 
+                                               onkeyup="searchManufacturers(this.value)">
+                                    </div>
+                                    
+                                    <div class="table-responsive">
+                                        <table class="table admin-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>ID</th>
+                                                    <th>Название</th>
+                                                    <th>Город</th>
+                                                    <th>Email</th>
+                                                    <th>Телефон</th>
+                                                    <th>Товаров</th>
+                                                    <th>Действия</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="manufacturersTableBody">
+                                                <!-- Производители будут загружены через JavaScript -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                
+                                <!-- База данных -->
+                                <div id="adminDatabaseContent" class="admin-section" style="display: none;">
+                                    <h2 class="mb-4"><i class="bi bi-database me-2"></i>Управление базой данных</h2>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="export-section">
+                                                <h5 class="mb-3">Экспорт данных</h5>
+                                                <div class="d-grid gap-2">
+                                                    <button class="btn btn-success mb-2" onclick="exportToJSON()">
+                                                        <i class="bi bi-filetype-json me-2"></i>Экспорт в JSON
+                                                    </button>
+                                                    <button class="btn btn-info mb-2" onclick="exportToSQL()">
+                                                        <i class="bi bi-filetype-sql me-2"></i>Экспорт в SQL
+                                                    </button>
+                                                    <button class="btn btn-warning mb-2" onclick="exportToCSV()">
+                                                        <i class="bi bi-filetype-csv me-2"></i>Экспорт в CSV (Прайс)
+                                                    </button>
+                                                    <button class="btn btn-secondary" onclick="backupDatabase()">
+                                                        <i class="bi bi-save me-2"></i>Создать резервную копию
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-md-6">
+                                            <div class="export-section">
+                                                <h5 class="mb-3">Импорт данных</h5>
+                                                <div class="d-grid gap-2">
+                                                    <input type="file" id="importFile" class="form-control mb-2" accept=".json,.sql,.csv">
+                                                    <button class="btn btn-primary mb-2" onclick="importFromFile()">
+                                                        <i class="bi bi-upload me-2"></i>Импортировать данные
+                                                    </button>
+                                                    <button class="btn btn-danger" onclick="resetDatabase()">
+                                                        <i class="bi bi-trash me-2"></i>Сбросить базу данных
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="export-section mt-4">
+                                        <h5 class="mb-3">Резервные копии</h5>
+                                        <div id="backupList">
+                                            <!-- Список резервных копий -->
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Настройки -->
+                                <div id="adminSettingsContent" class="admin-section" style="display: none;">
+                                    <h2 class="mb-4"><i class="bi bi-gear me-2"></i>Настройки системы</h2>
+                                    
+                                    <div class="export-section">
+                                        <h5 class="mb-3">Настройки администратора</h5>
+                                        <form id="adminSettingsForm">
+                                            <div class="mb-3">
+                                                <label class="admin-input-label">Логин администратора</label>
+                                                <input type="text" class="form-control admin-input" 
+                                                       value="${ADMIN_CREDENTIALS.username}" disabled>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="admin-input-label">Новый пароль</label>
+                                                <input type="password" class="form-control admin-input" 
+                                                       id="newAdminPassword" placeholder="Введите новый пароль">
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="admin-input-label">Повторите пароль</label>
+                                                <input type="password" class="form-control admin-input" 
+                                                       id="confirmAdminPassword" placeholder="Повторите пароль">
+                                            </div>
+                                            <button type="button" class="btn admin-btn" onclick="changeAdminPassword()">
+                                                <i class="bi bi-key me-2"></i>Изменить пароль
+                                            </button>
+                                        </form>
+                                    </div>
+                                    
+                                    <div class="export-section mt-4">
+                                        <h5 class="mb-3">Настройки сайта</h5>
+                                        <div class="form-check form-switch mb-3">
+                                            <input class="form-check-input" type="checkbox" id="autoSyncSwitch" checked>
+                                            <label class="form-check-label" for="autoSyncSwitch">
+                                                Автоматическая синхронизация с сайтом
+                                            </label>
+                                        </div>
+                                        <div class="form-check form-switch mb-3">
+                                            <input class="form-check-input" type="checkbox" id="notificationsSwitch" checked>
+                                            <label class="form-check-label" for="notificationsSwitch">
+                                                Уведомления об изменениях
+                                            </label>
+                                        </div>
+                                        <button class="btn btn-primary" onclick="saveSiteSettings()">
+                                            <i class="bi bi-save me-2"></i>Сохранить настройки
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Удаляем старую админ-панель если есть
+            const oldPanel = document.getElementById('adminDashboard');
+            if (oldPanel) oldPanel.remove();
+            
+            // Добавляем новую админ-панель
+            document.body.insertAdjacentHTML('beforeend', adminPanel);
+            
+            // Обновляем статистику
+            updateAdminStats();
+            
+            // Загружаем данные в таблицы
+            loadProductsTable();
+            loadManufacturersTable();
+            
+            // Загружаем список резервных копий
+            loadBackupList();
+        }
+        
+        // Показать раздел админ-панели
+        function showAdminSection(event, section) {
+            if (event) event.preventDefault();
+            
+            // Скрыть все разделы
+            document.querySelectorAll('.admin-section').forEach(el => {
+                el.style.display = 'none';
+            });
+            
+            // Убрать активный класс у всех ссылок
+            document.querySelectorAll('.admin-nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            
+            // Показать выбранный раздел
+            const sectionElement = document.getElementById(`admin${section.charAt(0).toUpperCase() + section.slice(1)}Content`);
+            if (sectionElement) {
+                sectionElement.style.display = 'block';
+            }
+            
+            // Добавить активный класс к выбранной ссылке
+            if (event && event.target) {
+                event.target.classList.add('active');
+            }
+        }
+        
+        // Обновление статистики в админ-панели
+        function updateAdminStats() {
+            const activeProducts = allProducts.filter(p => p.status === 'active' || p.status === undefined).length;
+            const activeManufacturers = allManufacturers.filter(m => m.status === 'active' || m.status === undefined).length;
+            const categories = [...new Set(allProducts.map(p => p.type).filter(type => type))].length;
+            
+            const adminTotalProducts = document.getElementById('adminTotalProducts');
+            const adminActiveProducts = document.getElementById('adminActiveProducts');
+            const adminTotalManufacturers = document.getElementById('adminTotalManufacturers');
+            const adminCategories = document.getElementById('adminCategories');
+            
+            if (adminTotalProducts) adminTotalProducts.textContent = allProducts.length;
+            if (adminActiveProducts) adminActiveProducts.textContent = activeProducts;
+            if (adminTotalManufacturers) adminTotalManufacturers.textContent = allManufacturers.length;
+            if (adminCategories) adminCategories.textContent = categories;
+        }
+        
+        // Загрузка данных в таблицу товаров
+        function loadProductsTable() {
+            const tbody = document.getElementById('productsTableBody');
+            if (!tbody) return;
+            
+            tbody.innerHTML = '';
+            
+            allProducts.forEach(product => {
+                const manufacturer = allManufacturers.find(m => m.id === product.manufacturer_id);
+                const row = `
+                    <tr>
+                        <td>${product.id}</td>
+                        <td><strong>${product.name}</strong></td>
+                        <td>${product.type || 'Не указан'}</td>
+                        <td>${formatCurrency(product.price)}/${product.unit || 'м'}</td>
+                        <td>${manufacturer ? manufacturer.name : 'Не указан'}</td>
+                        <td>
+                            <span class="status-badge ${(product.status === 'active' || product.status === undefined) ? 'status-active' : 'status-inactive'}">
+                                ${(product.status === 'active' || product.status === undefined) ? 'Активен' : 'Неактивен'}
+                            </span>
+                        </td>
+                        <td class="action-buttons">
+                            <button class="btn btn-sm btn-info" onclick="editProduct(${product.id})">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteProduct(${product.id})">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                            <button class="btn btn-sm ${(product.status === 'active' || product.status === undefined) ? 'btn-warning' : 'btn-success'}" 
+                                    onclick="toggleProductStatus(${product.id})">
+                                <i class="bi bi-power"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+        }
+        
+        // Загрузка данных в таблицу производителей
+        function loadManufacturersTable() {
+            const tbody = document.getElementById('manufacturersTableBody');
+            if (!tbody) return;
+            
+            tbody.innerHTML = '';
+            
+            allManufacturers.forEach(manufacturer => {
+                const productsCount = allProducts.filter(p => p.manufacturer_id === manufacturer.id).length;
+                const row = `
+                    <tr>
+                        <td>${manufacturer.id}</td>
+                        <td><strong>${manufacturer.name}</strong></td>
+                        <td>${manufacturer.city || 'Не указан'}</td>
+                        <td>${manufacturer.email || 'Не указан'}</td>
+                        <td>${manufacturer.phone || 'Не указан'}</td>
+                        <td>${productsCount}</td>
+                        <td class="action-buttons">
+                            <button class="btn btn-sm btn-info" onclick="editManufacturer(${manufacturer.id})">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteManufacturer(${manufacturer.id})">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                            <button class="btn btn-sm ${manufacturer.status === 'active' ? 'btn-warning' : 'btn-success'}" 
+                                    onclick="toggleManufacturerStatus(${manufacturer.id})">
+                                <i class="bi bi-power"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+        }
+        
+        // Поиск товаров
+        function searchProducts(query) {
+            const filteredProducts = allProducts.filter(product => 
+                product.name.toLowerCase().includes(query.toLowerCase()) ||
+                (product.type && product.type.toLowerCase().includes(query.toLowerCase())) ||
+                (product.specs && product.specs.toLowerCase().includes(query.toLowerCase()))
+            );
+            
+            const tbody = document.getElementById('productsTableBody');
+            tbody.innerHTML = '';
+            
+            filteredProducts.forEach(product => {
+                const manufacturer = allManufacturers.find(m => m.id === product.manufacturer_id);
+                const row = `
+                    <tr>
+                        <td>${product.id}</td>
+                        <td><strong>${product.name}</strong></td>
+                        <td>${product.type || 'Не указан'}</td>
+                        <td>${formatCurrency(product.price)}/${product.unit || 'м'}</td>
+                        <td>${manufacturer ? manufacturer.name : 'Не указан'}</td>
+                        <td>
+                            <span class="status-badge ${(product.status === 'active' || product.status === undefined) ? 'status-active' : 'status-inactive'}">
+                                ${(product.status === 'active' || product.status === undefined) ? 'Активен' : 'Неактивен'}
+                            </span>
+                        </td>
+                        <td class="action-buttons">
+                            <button class="btn btn-sm btn-info" onclick="editProduct(${product.id})">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteProduct(${product.id})">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                            <button class="btn btn-sm ${(product.status === 'active' || product.status === undefined) ? 'btn-warning' : 'btn-success'}" 
+                                    onclick="toggleProductStatus(${product.id})">
+                                <i class="bi bi-power"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+        }
+        
+        // Поиск производителей
+        function searchManufacturers(query) {
+            const filteredManufacturers = allManufacturers.filter(manufacturer => 
+                manufacturer.name.toLowerCase().includes(query.toLowerCase()) ||
+                (manufacturer.city && manufacturer.city.toLowerCase().includes(query.toLowerCase())) ||
+                (manufacturer.email && manufacturer.email.toLowerCase().includes(query.toLowerCase()))
+            );
+            
+            const tbody = document.getElementById('manufacturersTableBody');
+            tbody.innerHTML = '';
+            
+            filteredManufacturers.forEach(manufacturer => {
+                const productsCount = allProducts.filter(p => p.manufacturer_id === manufacturer.id).length;
+                const row = `
+                    <tr>
+                        <td>${manufacturer.id}</td>
+                        <td><strong>${manufacturer.name}</strong></td>
+                        <td>${manufacturer.city || 'Не указан'}</td>
+                        <td>${manufacturer.email || 'Не указан'}</td>
+                        <td>${manufacturer.phone || 'Не указан'}</td>
+                        <td>${productsCount}</td>
+                        <td class="action-buttons">
+                            <button class="btn btn-sm btn-info" onclick="editManufacturer(${manufacturer.id})">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteManufacturer(${manufacturer.id})">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                            <button class="btn btn-sm ${manufacturer.status === 'active' ? 'btn-warning' : 'btn-success'}" 
+                                    onclick="toggleManufacturerStatus(${manufacturer.id})">
+                                <i class="bi bi-power"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+        }
+        
+        // Показать модальное окно добавления товара
+        function showAddProductModal() {
+            // Удалить старую модалку если есть
+            const oldModal = document.getElementById('addProductModal');
+            if (oldModal) oldModal.remove();
+            
+            const modalHtml = `
+                <div class="modal fade" id="addProductModal" tabindex="-1">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content admin-modal-content">
+                            <div class="modal-header admin-modal-header">
+                                <h5 class="modal-title">
+                                    <i class="bi bi-plus-circle me-2"></i>Добавить новый товар
+                                </h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="addProductForm">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="admin-input-label">Название товара *</label>
+                                            <input type="text" class="form-control admin-input" 
+                                                   id="productName" required>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="admin-input-label">Тип товара *</label>
+                                            <select class="form-control admin-input" id="productType" required>
+                                                <option value="">Выберите тип</option>
+                                                <option value="Силовой">Силовой кабель</option>
+                                                <option value="Оптический">Оптический кабель</option>
+                                                <option value="Витая пара">Сетевой кабель (Витая пара)</option>
+                                                <option value="Коаксиальный">Коаксиальный кабель</option>
+                                                <option value="Контрольный">Контрольный кабель</option>
+                                                <option value="Температурный">Температурный кабель</option>
+                                                <option value="СИП">СИП (Самонесущий изолированный провод)</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="admin-input-label">Цена *</label>
+                                            <input type="number" step="0.01" class="form-control admin-input" 
+                                                   id="productPrice" required>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="admin-input-label">Единица измерения</label>
+                                            <select class="form-control admin-input" id="productUnit">
+                                                <option value="м">метр (м)</option>
+                                                <option value="шт">штука (шт)</option>
+                                                <option value="катушка">катушка</option>
+                                                <option value="бухта">бухта</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label class="admin-input-label">Технические характеристики</label>
+                                        <textarea class="form-control admin-input" id="productSpecs" 
+                                                  rows="3" placeholder="Например: Напряжение 0.66/1 кВ, сечение 3x2.5 мм²"></textarea>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label class="admin-input-label">Производитель *</label>
+                                        <select class="form-control admin-input" id="productManufacturer" required>
+                                            <option value="">Выберите производителя</option>
+                                            ${allManufacturers.map(m => `<option value="${m.id}">${m.name} (${m.city})</option>`).join('')}
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label class="admin-input-label">Статус</label>
+                                        <select class="form-control admin-input" id="productStatus">
+                                            <option value="active">Активен (виден на сайте)</option>
+                                            <option value="inactive">Неактивен (скрыт на сайте)</option>
+                                        </select>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                                <button type="button" class="btn admin-btn" onclick="saveNewProduct()">
+                                    <i class="bi bi-save me-2"></i>Сохранить товар
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Добавить новую модалку
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            
+            // Показать модалку
+            const modal = new bootstrap.Modal(document.getElementById('addProductModal'));
+            modal.show();
+        }
+        
+        // Сохранить новый товар
+        function saveNewProduct() {
+            const newProduct = {
+                id: allProducts.length > 0 ? Math.max(...allProducts.map(p => p.id)) + 1 : 1,
+                name: document.getElementById('productName').value,
+                type: document.getElementById('productType').value,
+                price: parseFloat(document.getElementById('productPrice').value),
+                unit: document.getElementById('productUnit').value,
+                specs: document.getElementById('productSpecs').value,
+                manufacturer_id: parseInt(document.getElementById('productManufacturer').value),
+                status: document.getElementById('productStatus').value,
+                created_at: new Date().toISOString()
+            };
+            
+            allProducts.push(newProduct);
+            saveProducts();
+            
+            // Закрыть модалку
+            bootstrap.Modal.getInstance(document.getElementById('addProductModal')).hide();
+            
+            // Обновить таблицу
+            loadProductsTable();
+            updateAdminStats();
+            
+            showNotification('Товар успешно добавлен!', 'success');
+        }
+        
+        // Показать модальное окно добавления производителя
+        function showAddManufacturerModal() {
+            // Удалить старую модалку если есть
+            const oldModal = document.getElementById('addManufacturerModal');
+            if (oldModal) oldModal.remove();
+            
+            const modalHtml = `
+                <div class="modal fade" id="addManufacturerModal" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content admin-modal-content">
+                            <div class="modal-header admin-modal-header">
+                                <h5 class="modal-title">
+                                    <i class="bi bi-building-add me-2"></i>Добавить нового производителя
+                                </h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="addManufacturerForm">
+                                    <div class="mb-3">
+                                        <label class="admin-input-label">Название компании *</label>
+                                        <input type="text" class="form-control admin-input" 
+                                               id="manufacturerName" required>
+                                    </div>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="admin-input-label">Город</label>
+                                            <input type="text" class="form-control admin-input" 
+                                                   id="manufacturerCity">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="admin-input-label">Страна</label>
+                                            <input type="text" class="form-control admin-input" 
+                                                   id="manufacturerCountry" value="Россия">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="admin-input-label">Email</label>
+                                            <input type="email" class="form-control admin-input" 
+                                                   id="manufacturerEmail">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="admin-input-label">Телефон</label>
+                                            <input type="tel" class="form-control admin-input" 
+                                                   id="manufacturerPhone">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label class="admin-input-label">Веб-сайт</label>
+                                        <input type="url" class="form-control admin-input" 
+                                               id="manufacturerWebsite" placeholder="https://">
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label class="admin-input-label">Описание</label>
+                                        <textarea class="form-control admin-input" id="manufacturerDescription" 
+                                                  rows="3" placeholder="Краткое описание компании..."></textarea>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label class="admin-input-label">Статус</label>
+                                        <select class="form-control admin-input" id="manufacturerStatus">
+                                            <option value="active">Активен</option>
+                                            <option value="inactive">Неактивен</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="mb-3 form-check">
+                                        <input type="checkbox" class="form-check-input" id="manufacturerFeatured">
+                                        <label class="form-check-label" for="manufacturerFeatured">
+                                            Показать на главной странице
+                                        </label>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                                <button type="button" class="btn admin-btn" onclick="saveNewManufacturer()">
+                                    <i class="bi bi-save me-2"></i>Сохранить производителя
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Добавить новую модалку
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            
+            // Показать модалку
+            const modal = new bootstrap.Modal(document.getElementById('addManufacturerModal'));
+            modal.show();
+        }
+        
+        // Сохранить нового производителя
+        function saveNewManufacturer() {
+            const newManufacturer = {
+                id: allManufacturers.length > 0 ? Math.max(...allManufacturers.map(m => m.id)) + 1 : 1,
+                name: document.getElementById('manufacturerName').value,
+                city: document.getElementById('manufacturerCity').value,
+                country: document.getElementById('manufacturerCountry').value,
+                email: document.getElementById('manufacturerEmail').value,
+                phone: document.getElementById('manufacturerPhone').value,
+                website: document.getElementById('manufacturerWebsite').value,
+                description: document.getElementById('manufacturerDescription').value,
+                status: document.getElementById('manufacturerStatus').value,
+                featured: document.getElementById('manufacturerFeatured').checked,
+                product_count: 0,
+                created_at: new Date().toISOString()
+            };
+            
+            allManufacturers.push(newManufacturer);
+            saveManufacturers();
+            
+            // Закрыть модалку
+            bootstrap.Modal.getInstance(document.getElementById('addManufacturerModal')).hide();
+            
+            // Обновить таблицу
+            loadManufacturersTable();
+            updateAdminStats();
+            
+            showNotification('Производитель успешно добавлен!', 'success');
+        }
+        
+        // Редактировать товар
+        function editProduct(productId) {
+            const product = allProducts.find(p => p.id === productId);
+            if (!product) return;
+            
+            // Создаем модальное окно редактирования
+            showAddProductModal();
+            
+            // Заполняем поля данными
+            setTimeout(() => {
+                document.getElementById('productName').value = product.name;
+                document.getElementById('productType').value = product.type || '';
+                document.getElementById('productPrice').value = product.price;
+                document.getElementById('productUnit').value = product.unit || 'м';
+                document.getElementById('productSpecs').value = product.specs || '';
+                document.getElementById('productManufacturer').value = product.manufacturer_id || '';
+                document.getElementById('productStatus').value = product.status || 'active';
+                
+                // Меняем заголовок и кнопку
+                const modal = document.getElementById('addProductModal');
+                modal.querySelector('.modal-title').innerHTML = '<i class="bi bi-pencil me-2"></i>Редактировать товар';
+                modal.querySelector('.btn-admin-btn').innerHTML = '<i class="bi bi-save me-2"></i>Сохранить изменения';
+                
+                // Меняем обработчик
+                modal.querySelector('.btn-admin-btn').onclick = function() { updateProduct(productId); };
+            }, 300);
+        }
+        
+        // Обновить товар
+        function updateProduct(productId) {
+            const productIndex = allProducts.findIndex(p => p.id === productId);
+            if (productIndex === -1) return;
+            
+            allProducts[productIndex] = {
+                ...allProducts[productIndex],
+                name: document.getElementById('productName').value,
+                type: document.getElementById('productType').value,
+                price: parseFloat(document.getElementById('productPrice').value),
+                unit: document.getElementById('productUnit').value,
+                specs: document.getElementById('productSpecs').value,
+                manufacturer_id: parseInt(document.getElementById('productManufacturer').value),
+                status: document.getElementById('productStatus').value
+            };
+            
+            saveProducts();
+            
+            // Закрыть модалку
+            bootstrap.Modal.getInstance(document.getElementById('addProductModal')).hide();
+            
+            // Обновить таблицу
+            loadProductsTable();
+            
+            showNotification('Товар успешно обновлен!', 'success');
+        }
+        
+        // Удалить товар
+        function deleteProduct(productId) {
+            if (confirm('Вы уверены, что хотите удалить этот товар? Это действие нельзя отменить.')) {
+                allProducts = allProducts.filter(p => p.id !== productId);
+                saveProducts();
+                loadProductsTable();
+                updateAdminStats();
+                showNotification('Товар успешно удален!', 'success');
+            }
+        }
+        
+        // Изменить статус товара
+        function toggleProductStatus(productId) {
+            const product = allProducts.find(p => p.id === productId);
+            if (product) {
+                product.status = (product.status === 'active' || product.status === undefined) ? 'inactive' : 'active';
+                saveProducts();
+                loadProductsTable();
+                showNotification('Статус товара изменен!', 'success');
+            }
+        }
+        
+        // Редактировать производителя
+        function editManufacturer(manufacturerId) {
+            const manufacturer = allManufacturers.find(m => m.id === manufacturerId);
+            if (!manufacturer) return;
+            
+            // Создаем модальное окно редактирования
+            showAddManufacturerModal();
+            
+            // Заполняем поля данными
+            setTimeout(() => {
+                document.getElementById('manufacturerName').value = manufacturer.name;
+                document.getElementById('manufacturerCity').value = manufacturer.city || '';
+                document.getElementById('manufacturerCountry').value = manufacturer.country || 'Россия';
+                document.getElementById('manufacturerEmail').value = manufacturer.email || '';
+                document.getElementById('manufacturerPhone').value = manufacturer.phone || '';
+                document.getElementById('manufacturerWebsite').value = manufacturer.website || '';
+                document.getElementById('manufacturerDescription').value = manufacturer.description || '';
+                document.getElementById('manufacturerStatus').value = manufacturer.status || 'active';
+                document.getElementById('manufacturerFeatured').checked = manufacturer.featured || false;
+                
+                // Меняем заголовок и кнопку
+                const modal = document.getElementById('addManufacturerModal');
+                modal.querySelector('.modal-title').innerHTML = '<i class="bi bi-pencil me-2"></i>Редактировать производителя';
+                modal.querySelector('.btn-admin-btn').innerHTML = '<i class="bi bi-save me-2"></i>Сохранить изменения';
+                
+                // Меняем обработчик
+                modal.querySelector('.btn-admin-btn').onclick = function() { updateManufacturer(manufacturerId); };
+            }, 300);
+        }
+        
+        // Обновить производителя
+        function updateManufacturer(manufacturerId) {
+            const manufacturerIndex = allManufacturers.findIndex(m => m.id === manufacturerId);
+            if (manufacturerIndex === -1) return;
+            
+            allManufacturers[manufacturerIndex] = {
+                ...allManufacturers[manufacturerIndex],
+                name: document.getElementById('manufacturerName').value,
+                city: document.getElementById('manufacturerCity').value,
+                country: document.getElementById('manufacturerCountry').value,
+                email: document.getElementById('manufacturerEmail').value,
+                phone: document.getElementById('manufacturerPhone').value,
+                website: document.getElementById('manufacturerWebsite').value,
+                description: document.getElementById('manufacturerDescription').value,
+                status: document.getElementById('manufacturerStatus').value,
+                featured: document.getElementById('manufacturerFeatured').checked
+            };
+            
+            saveManufacturers();
+            
+            // Закрыть модалку
+            bootstrap.Modal.getInstance(document.getElementById('addManufacturerModal')).hide();
+            
+            // Обновить таблицу
+            loadManufacturersTable();
+            
+            showNotification('Производитель успешно обновлен!', 'success');
+        }
+        
+        // Удалить производителя
+        function deleteManufacturer(manufacturerId) {
+            // Проверяем, есть ли товары у этого производителя
+            const manufacturerProducts = allProducts.filter(p => p.manufacturer_id === manufacturerId);
+            
+            if (manufacturerProducts.length > 0) {
+                if (!confirm('У этого производителя есть ' + manufacturerProducts.length + ' товаров. Все они будут удалены. Продолжить?')) {
+                    return;
+                }
+                
+                // Удаляем товары производителя
+                allProducts = allProducts.filter(p => p.manufacturer_id !== manufacturerId);
+                saveProducts();
+            }
+            
+            allManufacturers = allManufacturers.filter(m => m.id !== manufacturerId);
+            saveManufacturers();
+            
+            loadProductsTable();
+            loadManufacturersTable();
+            updateAdminStats();
+            
+            showNotification('Производитель и его товары удалены!', 'success');
+        }
+        
+        // Изменить статус производителя
+        function toggleManufacturerStatus(manufacturerId) {
+            const manufacturer = allManufacturers.find(m => m.id === manufacturerId);
+            if (manufacturer) {
+                manufacturer.status = manufacturer.status === 'active' ? 'inactive' : 'active';
+                saveManufacturers();
+                loadManufacturersTable();
+                showNotification('Статус производителя изменен!', 'success');
+            }
+        }
+        
+        // Синхронизировать с главным сайтом
+        function syncWithMainSite() {
+            // Обновляем главную страницу
+            loadData();
+            showNotification('Данные синхронизированы с главным сайтом!', 'success');
+        }
+        
+        // Создать резервную копию базы данных
+        function backupDatabase() {
+            const backup = {
+                products: allProducts,
+                manufacturers: allManufacturers,
+                timestamp: Date.now(),
+                date: new Date().toISOString(),
+                size: JSON.stringify({products: allProducts, manufacturers: allManufacturers}).length
+            };
+            
+            // Получаем существующие резервные копии
+            let backups = JSON.parse(localStorage.getItem(DATABASE_BACKUP_KEY) || '[]');
+            
+            // Добавляем новую резервную копию
+            backups.push(backup);
+            
+            // Храним только последние 10 резервных копий
+            if (backups.length > 10) {
+                backups = backups.slice(-10);
+            }
+            
+            localStorage.setItem(DATABASE_BACKUP_KEY, JSON.stringify(backups));
+            
+            // Обновляем список резервных копий
+            loadBackupList();
+            
+            showNotification('Резервная копия создана успешно!', 'success');
+        }
+        
+        // Загрузить список резервных копий
+        function loadBackupList() {
+            const backupList = document.getElementById('backupList');
+            if (!backupList) return;
+            
+            const backups = JSON.parse(localStorage.getItem(DATABASE_BACKUP_KEY) || '[]');
+            
+            if (backups.length === 0) {
+                backupList.innerHTML = '<p class="text-muted">Резервные копии отсутствуют</p>';
+                return;
+            }
+            
+            let html = '<div class="list-group">';
+            backups.reverse().forEach((backup, index) => {
+                const date = new Date(backup.timestamp);
+                html += `
+                    <div class="list-group-item list-group-item-action bg-dark text-white border-secondary">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">Резервная копия #${backups.length - index}</h6>
+                            <small>${date.toLocaleDateString()} ${date.toLocaleTimeString()}</small>
+                        </div>
+                        <p class="mb-1">
+                            Товаров: ${backup.products.length}, Производителей: ${backup.manufacturers.length}
+                        </p>
+                        <div class="mt-2">
+                            <button class="btn btn-sm btn-success me-2" onclick="restoreBackup(${backup.timestamp})">
+                                <i class="bi bi-arrow-clockwise me-1"></i>Восстановить
+                            </button>
+                            <button class="btn btn-sm btn-info me-2" onclick="downloadBackup(${backup.timestamp})">
+                                <i class="bi bi-download me-1"></i>Скачать
+                            </button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteBackup(${backup.timestamp})">
+                                <i class="bi bi-trash me-1"></i>Удалить
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            
+            backupList.innerHTML = html;
+        }
+        
+        // Восстановить из резервной копии
+        function restoreBackup(timestamp) {
+            if (confirm('Вы уверены, что хотите восстановить базу данных из резервной копии? Текущие данные будут заменены.')) {
+                const backups = JSON.parse(localStorage.getItem(DATABASE_BACKUP_KEY) || '[]');
+                const backup = backups.find(b => b.timestamp === timestamp);
+                
+                if (backup) {
+                    allProducts = backup.products;
+                    allManufacturers = backup.manufacturers;
+                    
+                    saveProducts();
+                    saveManufacturers();
+                    
+                    // Обновляем интерфейс
+                    loadProductsTable();
+                    loadManufacturersTable();
+                    updateAdminStats();
+                    
+                    showNotification('База данных восстановлена из резервной копии!', 'success');
+                }
+            }
+        }
+        
+        // Скачать резервную копию
+        function downloadBackup(timestamp) {
+            const backups = JSON.parse(localStorage.getItem(DATABASE_BACKUP_KEY) || '[]');
+            const backup = backups.find(b => b.timestamp === timestamp);
+            
+            if (backup) {
+                const dataStr = JSON.stringify(backup, null, 2);
+                const dataBlob = new Blob([dataStr], { type: 'application/json' });
+                
+                const url = URL.createObjectURL(dataBlob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `cableproduction_backup_${new Date(backup.timestamp).toISOString().slice(0,10)}.json`;
+                link.click();
+                
+                showNotification('Резервная копия скачана!', 'success');
+            }
+        }
+        
+        // Удалить резервную копию
+        function deleteBackup(timestamp) {
+            if (confirm('Удалить эту резервную копию?')) {
+                let backups = JSON.parse(localStorage.getItem(DATABASE_BACKUP_KEY) || '[]');
+                backups = backups.filter(b => b.timestamp !== timestamp);
+                localStorage.setItem(DATABASE_BACKUP_KEY, JSON.stringify(backups));
+                loadBackupList();
+                showNotification('Резервная копия удалена!', 'success');
+            }
+        }
+        
+        // Экспорт в JSON
+        function exportToJSON() {
+            const data = {
+                products: allProducts,
+                manufacturers: allManufacturers,
+                export_date: new Date().toISOString(),
+                version: '1.0'
+            };
+            
+            const dataStr = JSON.stringify(data, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `cableproduction_database_${new Date().toISOString().slice(0,10)}.json`;
+            link.click();
+            
+            showNotification('Данные экспортированы в JSON файл!', 'success');
+        }
+        
+        // Экспорт в SQL
+        function exportToSQL() {
+            let sql = `-- CableProduction Database Export\n`;
+            sql += `-- Export Date: ${new Date().toISOString()}\n`;
+            sql += `-- Total Products: ${allProducts.length}\n`;
+            sql += `-- Total Manufacturers: ${allManufacturers.length}\n\n`;
+            
+            // Таблица производителей
+            sql += `-- Таблица manufacturers\n`;
+            sql += `CREATE TABLE IF NOT EXISTS manufacturers (\n`;
+            sql += `  id INT PRIMARY KEY AUTO_INCREMENT,\n`;
+            sql += `  name VARCHAR(255) NOT NULL,\n`;
+            sql += `  city VARCHAR(100),\n`;
+            sql += `  country VARCHAR(100) DEFAULT 'Россия',\n`;
+            sql += `  email VARCHAR(255),\n`;
+            sql += `  phone VARCHAR(50),\n`;
+            sql += `  website VARCHAR(255),\n`;
+            sql += `  description TEXT,\n`;
+            sql += `  status ENUM('active', 'inactive') DEFAULT 'active',\n`;
+            sql += `  featured BOOLEAN DEFAULT FALSE,\n`;
+            sql += `  product_count INT DEFAULT 0,\n`;
+            sql += `  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n`;
+            sql += `);\n\n`;
+            
+            // Вставка производителей
+            if (allManufacturers.length > 0) {
+                sql += `INSERT INTO manufacturers (id, name, city, country, email, phone, website, description, status, featured, product_count, created_at) VALUES\n`;
+                allManufacturers.forEach((manufacturer, index) => {
+                    const name = (manufacturer.name || '').replace(/'/g, "''");
+                    const city = (manufacturer.city || '').replace(/'/g, "''");
+                    const country = (manufacturer.country || 'Россия').replace(/'/g, "''");
+                    const email = (manufacturer.email || '').replace(/'/g, "''");
+                    const phone = (manufacturer.phone || '').replace(/'/g, "''");
+                    const website = (manufacturer.website || '').replace(/'/g, "''");
+                    const description = (manufacturer.description || '').replace(/'/g, "''");
+                    
+                    sql += `  (${manufacturer.id}, '${name}', '${city}', '${country}', '${email}', '${phone}', '${website}', '${description}', '${manufacturer.status || 'active'}', ${manufacturer.featured ? 1 : 0}, ${manufacturer.product_count || 0}, '${manufacturer.created_at || new Date().toISOString()}')`;
+                    sql += index === allManufacturers.length - 1 ? ';\n\n' : ',\n';
+                });
+            }
+            
+            // Таблица товаров
+            sql += `-- Таблица products\n`;
+            sql += `CREATE TABLE IF NOT EXISTS products (\n`;
+            sql += `  id INT PRIMARY KEY AUTO_INCREMENT,\n`;
+            sql += `  name VARCHAR(255) NOT NULL,\n`;
+            sql += `  type VARCHAR(100),\n`;
+            sql += `  price DECIMAL(10,2) NOT NULL,\n`;
+            sql += `  unit VARCHAR(20) DEFAULT 'м',\n`;
+            sql += `  specs TEXT,\n`;
+            sql += `  manufacturer_id INT,\n`;
+            sql += `  status ENUM('active', 'inactive') DEFAULT 'active',\n`;
+            sql += `  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n`;
+            sql += `  FOREIGN KEY (manufacturer_id) REFERENCES manufacturers(id)\n`;
+            sql += `);\n\n`;
+            
+            // Вставка товаров
+            if (allProducts.length > 0) {
+                sql += `INSERT INTO products (id, name, type, price, unit, specs, manufacturer_id, status, created_at) VALUES\n`;
+                allProducts.forEach((product, index) => {
+                    const name = (product.name || '').replace(/'/g, "''");
+                    const type = (product.type || '').replace(/'/g, "''");
+                    const specs = (product.specs || '').replace(/'/g, "''");
+                    
+                    sql += `  (${product.id}, '${name}', '${type}', ${product.price || 0}, '${product.unit || 'м'}', '${specs}', ${product.manufacturer_id || 'NULL'}, '${product.status || 'active'}', '${product.created_at || new Date().toISOString()}')`;
+                    sql += index === allProducts.length - 1 ? ';\n' : ',\n';
+                });
+            }
+            
+            // Создаем и скачиваем файл
+            const blob = new Blob([sql], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `cableproduction_database_${new Date().toISOString().slice(0,10)}.sql`;
+            link.click();
+            
+            showNotification('Данные экспортированы в SQL файл!', 'success');
+        }
+        
+        // Экспорт в CSV
+        function exportToCSV() {
+            downloadPriceList(); // Используем существующую функцию
+        }
+        
+        // Импорт из файла
+        function importFromFile() {
+            const fileInput = document.getElementById('importFile');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                showNotification('Выберите файл для импорта', 'warning');
+                return;
+            }
+            
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                try {
+                    const content = e.target.result;
+                    
+                    if (file.name.endsWith('.json')) {
+                        // Импорт JSON
+                        const data = JSON.parse(content);
+                        
+                        if (data.products && data.manufacturers) {
+                            allProducts = data.products;
+                            allManufacturers = data.manufacturers;
+                            
+                            saveProducts();
+                            saveManufacturers();
+                            
+                            loadProductsTable();
+                            loadManufacturersTable();
+                            updateAdminStats();
+                            
+                            showNotification('Данные успешно импортированы из JSON файла!', 'success');
+                        } else {
+                            showNotification('Неправильный формат JSON файла', 'error');
+                        }
+                    } else {
+                        showNotification('Поддерживаются только JSON файлы', 'warning');
+                    }
+                } catch (error) {
+                    showNotification('Ошибка при чтении файла: ' + error.message, 'error');
+                }
+            };
+            
+            reader.readAsText(file);
+        }
+        
+        // Сброс базы данных
+        function resetDatabase() {
+            if (confirm('ВНИМАНИЕ! Вы собираетесь полностью сбросить базу данных. Все товары и производители будут удалены. Это действие нельзя отменить. Продолжить?')) {
+                // Создаем резервную копию перед сбросом
+                backupDatabase();
+                
+                // Загружаем начальные данные
+                loadDefaultProducts();
+                loadDefaultManufacturers();
+                
+                // Обновляем интерфейс
+                loadProductsTable();
+                loadManufacturersTable();
+                updateAdminStats();
+                
+                showNotification('База данных сброшена до начального состояния!', 'success');
+            }
+        }
+        
+        // Изменить пароль администратора
+        async function changeAdminPassword() {
+            const newPassword = document.getElementById('newAdminPassword').value;
+            const confirmPassword = document.getElementById('confirmAdminPassword').value;
+            
+            if (!newPassword || !confirmPassword) {
+                showNotification('Заполните оба поля пароля', 'warning');
+                return;
+            }
+            
+            if (newPassword !== confirmPassword) {
+                showNotification('Пароли не совпадают', 'error');
+                return;
+            }
+            
+            if (newPassword.length < 6) {
+                showNotification('Пароль должен содержать минимум 6 символов', 'warning');
+                return;
+            }
+            
+            try {
+                // Хэшируем новый пароль
+                const hashedPassword = await hashPassword(newPassword);
+                
+                // Сохраняем новый хэш
+                localStorage.setItem(ADMIN_PASSWORD_HASH_KEY, hashedPassword);
+                
+                // Очищаем поля
+                document.getElementById('newAdminPassword').value = '';
+                document.getElementById('confirmAdminPassword').value = '';
+                
+                showNotification('Пароль успешно изменен!', 'success');
+            } catch (error) {
+                console.error('Ошибка при изменении пароля:', error);
+                showNotification('Ошибка при изменении пароля', 'error');
+            }
+        }
+        
+        // Сохранить настройки сайта
+        function saveSiteSettings() {
+            showNotification('Настройки сохранены!', 'success');
+        }
+        
+        // Закрыть админ-панель
+        function closeAdminDashboard() {
+            const adminDashboard = document.getElementById('adminDashboard');
+            if (adminDashboard) {
+                adminDashboard.remove();
+            }
+            isAdminLoggedIn = false;
+            localStorage.removeItem(ADMIN_CREDENTIALS_KEY);
+            showNotification('Вы вышли из админ-панели', 'info');
+        }
+        
+        // Сохранить товары в localStorage
+        function saveProducts() {
+            localStorage.setItem(PRODUCTS_KEY, JSON.stringify(allProducts));
+            updateLastUpdateTime();
+        }
+        
+        // Сохранить производителей в localStorage
+        function saveManufacturers() {
+            localStorage.setItem(MANUFACTURERS_KEY, JSON.stringify(allManufacturers));
+            updateLastUpdateTime();
+        }
+        
+        // Загрузка данных из localStorage
+        function loadData() {
+            showLoader('productsLoader', true);
+            showLoader('manufacturersLoader', true);
+            
+            // Загружаем продукты
+            const productsData = localStorage.getItem(PRODUCTS_KEY);
+            if (productsData) {
+                try {
+                    allProducts = JSON.parse(productsData);
+                } catch (error) {
+                    console.error('Ошибка при загрузке продуктов:', error);
+                    loadDefaultProducts();
+                }
+            } else {
+                loadDefaultProducts();
+            }
+            
+            // Загружаем производителей
+            const manufacturersData = localStorage.getItem(MANUFACTURERS_KEY);
+            if (manufacturersData) {
+                try {
+                    allManufacturers = JSON.parse(manufacturersData);
+                } catch (error) {
+                    console.error('Ошибка при загрузке производителей:', error);
+                    loadDefaultManufacturers();
+                }
+            } else {
+                loadDefaultManufacturers();
+            }
+            
+            // Обновляем отображение
+            updateDisplay();
+            
+            // Скрываем лоадеры
+            setTimeout(() => {
+                showLoader('productsLoader', false);
+                showLoader('manufacturersLoader', false);
+            }, 500);
+        }
+        
+        // Обновить отображение данных на сайте
+        function updateDisplay() {
+            // Фильтруем только активные товары
+            const activeProducts = allProducts.filter(product => 
+                product.status === 'active' || product.status === undefined
+            );
+            
+            // Фильтруем только активных производителей
+            const activeManufacturers = allManufacturers.filter(manufacturer => 
+                manufacturer.status === 'active' || manufacturer.status === undefined
+            );
+            
+            // Обновляем статистику
+            updateProductsStats(activeProducts);
+            updateManufacturersStats(activeManufacturers);
+            updateOverallStats();
+            
+            // Отображаем популярные товары
+            displayPopularProducts(activeProducts.slice(0, 6));
+            
+            // Обновляем счетчики категорий
+            updateCategoryCounts(activeProducts);
+            
+            // Отображаем производителей
+            displayManufacturers(activeManufacturers.slice(0, 8));
+            
+            // Обновляем статистику по городам
+            updateCitiesStats(activeManufacturers);
+            
+            // Генерируем ссылки в каталоге
+            generateCatalogLinks(activeProducts);
+            
+            dataLoaded = true;
+        }
+        
+        // Загрузка демо продуктов
+        function loadDefaultProducts() {
+            allProducts = [
+                {
+                    id: 1,
+                    name: "Кабель ВВГнг 3х2.5",
+                    type: "Силовой",
+                    price: 45.50,
+                    unit: "м",
+                    specs: "Напряжение 0.66/1 кВ, сечение 3x2.5 мм², не распространяющий горение",
+                    manufacturer_id: 1,
+                    status: "active",
+                    created_at: "2024-01-15T10:30:00Z"
+                },
+                {
+                    id: 2,
+                    name: "Оптический кабель ОКБ-12",
+                    type: "Оптический",
+                    price: 150.00,
+                    unit: "м",
+                    specs: "12 волокон, бронированный, для прокладки в грунт",
+                    manufacturer_id: 2,
+                    status: "active",
+                    created_at: "2024-01-20T09:15:00Z"
+                },
+                {
+                    id: 3,
+                    name: "Кабель UTP Cat.6",
+                    type: "Витая пара",
+                    price: 25.30,
+                    unit: "м",
+                    specs: "Витая пара, 4 пары, категория 6, неэкранированный",
+                    manufacturer_id: 3,
+                    status: "active",
+                    created_at: "2024-01-25T11:20:00Z"
+                },
+                {
+                    id: 4,
+                    name: "Кабель РК-75",
+                    type: "Коаксиальный",
+                    price: 38.75,
+                    unit: "м",
+                    specs: "Коаксиальный кабель 75 Ом, для телевидения",
+                    manufacturer_id: 1,
+                    status: "active",
+                    created_at: "2024-02-01T14:20:00Z"
+                },
+                {
+                    id: 5,
+                    name: "Кабель СИП-4 16мм²",
+                    type: "Силовой",
+                    price: 89.90,
+                    unit: "м",
+                    specs: "Самонесущий изолированный провод, 16 мм²",
+                    manufacturer_id: 2,
+                    status: "active",
+                    created_at: "2024-02-05T13:10:00Z"
+                },
+                {
+                    id: 6,
+                    name: "Кабель ВВГнг-LS 5х6",
+                    type: "Силовой",
+                    price: 120.50,
+                    unit: "м",
+                    specs: "Пониженное дымо- и газовыделение, 5x6 мм²",
+                    manufacturer_id: 3,
+                    status: "active",
+                    created_at: "2024-02-10T16:45:00Z"
+                }
+            ];
+            
+            saveProducts();
+        }
+        
+        // Загрузка демо производителей
+        function loadDefaultManufacturers() {
+            allManufacturers = [
+                {
+                    id: 1,
+                    name: "Энергомонтаж",
+                    city: "Москва",
+                    country: "Россия",
+                    email: "info@energomontag.ru",
+                    phone: "+7 (495) 123-45-67",
+                    website: "energomontag.ru",
+                    description: "Производитель силовых кабелей",
+                    status: "active",
+                    featured: true,
+                    product_count: 15,
+                    created_at: "2024-01-01T00:00:00Z"
+                },
+                {
+                    id: 2,
+                    name: "Электрокабель",
+                    city: "Санкт-Петербург",
+                    country: "Россия",
+                    email: "sales@elektrokabel.ru",
+                    phone: "+7 (812) 234-56-78",
+                    website: "elektrokabel.ru",
+                    description: "Производитель оптических кабелей",
+                    status: "active",
+                    featured: false,
+                    product_count: 12,
+                    created_at: "2024-01-01T00:00:00Z"
+                },
+                {
+                    id: 3,
+                    name: "Сибкабель",
+                    city: "Новосибирск",
+                    country: "Россия",
+                    email: "contact@sibkabel.ru",
+                    phone: "+7 (383) 345-67-89",
+                    website: "sibkabel.ru",
+                    description: "Производитель кабельной продукции",
+                    status: "active",
+                    featured: true,
+                    product_count: 8,
+                    created_at: "2024-01-01T00:00:00Z"
+                },
+                {
+                    id: 4,
+                    name: "Москабель",
+                    city: "Москва",
+                    country: "Россия",
+                    email: "info@moskabel.ru",
+                    phone: "+7 (495) 456-78-90",
+                    website: "moskabel.ru",
+                    description: "Крупный производитель кабелей",
+                    status: "active",
+                    featured: true,
+                    product_count: 20,
+                    created_at: "2024-01-01T00:00:00Z"
+                }
+            ];
+            
+            saveManufacturers();
+        }
+        
+        // Отображение популярных товаров
+        function displayPopularProducts(products) {
+            const container = document.getElementById('productsContainer');
+            container.innerHTML = '';
+            
+            if (products.length === 0) {
+                container.innerHTML = `
+                    <div class="col-12 text-center py-5">
+                        <i class="bi bi-box-seam display-1 text-muted"></i>
+                        <h4 class="mt-3">Товары не найдены</h4>
+                        <p class="text-muted">Добавьте товары через админ-панель</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            products.forEach(product => {
+                const manufacturer = allManufacturers.find(m => m.id === product.manufacturer_id);
+                const productCard = `
+                    <div class="col-md-4">
+                        <div class="product-card">
+                            <div class="product-img">
+                                <i class="${getProductIcon(product.type)}"></i>
+                            </div>
+                            <div class="product-body">
+                                <h5 class="product-title">${product.name}</h5>
+                                <p class="product-specs">${product.specs || 'Технические характеристики не указаны'}</p>
+                                <div class="product-price">${formatCurrency(product.price)}/${product.unit || 'м'}</div>
+                                <div class="product-manufacturer">Производитель: ${manufacturer ? manufacturer.name : 'Не указан'}</div>
+                                <button class="btn btn-sm btn-green w-100" onclick="showProductDetail(${product.id})">
+                                    Подробнее
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += productCard;
+            });
+        }
+        
+        // Отображение всех товаров
+        function loadAllProducts() {
+            showLoader('productsLoader', true);
+            
+            setTimeout(() => {
+                const activeProducts = allProducts.filter(product => 
+                    product.status === 'active' || product.status === undefined
+                );
+                
+                displayPopularProducts(activeProducts);
+                
+                // Обновляем заголовок
+                const title = document.querySelector('#catalog h3');
+                if (title) {
+                    title.textContent = `Все товары (${activeProducts.length})`;
+                }
+                
+                showLoader('productsLoader', false);
+                
+                // Прокручиваем к каталогу
+                document.getElementById('catalog').scrollIntoView({ behavior: 'smooth' });
+            }, 500);
+        }
+        
+        // Фильтрация по типу
+        function filterByType(type) {
+            showLoader('productsLoader', true);
+            
+            setTimeout(() => {
+                const activeProducts = allProducts.filter(product => 
+                    (product.status === 'active' || product.status === undefined) && 
+                    product.type === type
+                );
+                
+                displayPopularProducts(activeProducts);
+                
+                // Обновляем заголовок
+                const title = document.querySelector('#catalog h3');
+                if (title) {
+                    title.textContent = `${type} кабели (${activeProducts.length})`;
+                }
+                
+                showLoader('productsLoader', false);
+                
+                // Прокручиваем к каталогу
+                document.getElementById('catalog').scrollIntoView({ behavior: 'smooth' });
+            }, 500);
+        }
+        
+        // Отображение производителей
+        function displayManufacturers(manufacturers) {
+            const container = document.getElementById('manufacturersContainer');
+            container.innerHTML = '';
+            
+            if (manufacturers.length === 0) {
+                container.innerHTML = `
+                    <div class="col-12 text-center py-5">
+                        <i class="bi bi-buildings display-1 text-muted"></i>
+                        <h4 class="mt-3">Производители не найдены</h4>
+                        <p class="text-muted">Добавьте производители через админ-панель</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            manufacturers.forEach(manufacturer => {
+                const productsCount = allProducts.filter(p => p.manufacturer_id === manufacturer.id).length;
+                const manufacturerCard = `
+                    <div class="col-md-3 col-6">
+                        <div class="text-center p-3" style="background-color: var(--black-light); border-radius: var(--radius); cursor: pointer;" 
+                             onclick="showManufacturerProducts(${manufacturer.id})">
+                            <div class="mb-3">
+                                <i class="bi bi-building" style="font-size: 40px; color: var(--green-primary);"></i>
+                            </div>
+                            <h5>${manufacturer.name}</h5>
+                            <small class="text-muted">${manufacturer.city || 'Город не указан'}</small>
+                            <div class="mt-2">
+                                <span class="badge ${manufacturer.featured ? 'bg-warning' : 'bg-secondary'}">
+                                    ${productsCount} товаров
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += manufacturerCard;
+            });
+        }
+        
+        // Показать товары производителя
+        function showManufacturerProducts(manufacturerId) {
+            const manufacturer = allManufacturers.find(m => m.id === manufacturerId);
+            const manufacturerProducts = allProducts.filter(product => 
+                product.manufacturer_id === manufacturerId && 
+                (product.status === 'active' || product.status === undefined)
+            );
+            
+            showLoader('productsLoader', true);
+            
+            setTimeout(() => {
+                displayPopularProducts(manufacturerProducts);
+                
+                // Обновляем заголовок
+                const title = document.querySelector('#catalog h3');
+                if (title) {
+                    title.textContent = `Товары ${manufacturer.name} (${manufacturerProducts.length})`;
+                }
+                
+                showLoader('productsLoader', false);
+                
+                // Прокручиваем к каталогу
+                document.getElementById('catalog').scrollIntoView({ behavior: 'smooth' });
+            }, 500);
+        }
+        
+        // Обновление статистики продуктов
+        function updateProductsStats(products) {
+            document.getElementById('statsProducts').textContent = products.length;
+            
+            // Обновляем общую статистику в подвале
+            updateDataStats();
+        }
+        
+        // Обновление статистики производителей
+        function updateManufacturersStats(manufacturers) {
+            document.getElementById('statsManufacturers').textContent = manufacturers.length;
+            
+            // Подсчет уникальных городов
+            const cities = [...new Set(manufacturers.map(m => m.city).filter(city => city))];
+            document.getElementById('statsCities').textContent = cities.length;
+            
+            // Обновляем общую статистику в подвале
+            updateDataStats();
+        }
+        
+        // Обновление общей статистики
+        function updateOverallStats() {
+            const activeProducts = allProducts.filter(product => 
+                product.status === 'active' || product.status === undefined
+            );
+            const activeManufacturers = allManufacturers.filter(manufacturer => 
+                manufacturer.status === 'active' || manufacturer.status === undefined
+            );
+            
+            // Подсчет уникальных типов
+            const types = [...new Set(activeProducts.map(p => p.type).filter(type => type))];
+            document.getElementById('statsTypes').textContent = types.length;
+            
+            // Обновляем общую статистику в подвале
+            updateDataStats();
+        }
+        
+        // Обновление счетчиков категорий
+        function updateCategoryCounts(products) {
+            const counts = {
+                'Силовой': products.filter(p => p.type === 'Силовой').length,
+                'Оптический': products.filter(p => p.type === 'Оптический').length,
+                'Витая пара': products.filter(p => p.type === 'Витая пара').length,
+                'Коаксиальный': products.filter(p => p.type === 'Коаксиальный').length
+            };
+            
+            document.getElementById('count-silovye').textContent = `${counts['Силовой']} товаров`;
+            document.getElementById('count-optika').textContent = `${counts['Оптический']} товаров`;
+            document.getElementById('count-setevye').textContent = `${counts['Витая пара']} товаров`;
+            document.getElementById('count-koaks').textContent = `${counts['Коаксиальный']} товаров`;
+        }
+        
+        // Обновление статистики по городам
+        function updateCitiesStats(manufacturers) {
+            const citiesContainer = document.getElementById('citiesStats');
+            if (!citiesContainer) return;
+            
+            citiesContainer.innerHTML = '';
+            
+            // Группировка производителей по городам
+            const cityCounts = {};
+            manufacturers.forEach(manufacturer => {
+                if (manufacturer.city) {
+                    if (!cityCounts[manufacturer.city]) {
+                        cityCounts[manufacturer.city] = 0;
+                    }
+                    cityCounts[manufacturer.city]++;
+                }
+            });
+            
+            // Сортировка по количеству производителей
+            const sortedCities = Object.entries(cityCounts)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 4);
+            
+            sortedCities.forEach(([city, count]) => {
+                const cityCard = `
+                    <div class="col-md-3 col-6">
+                        <div class="text-center">
+                            <div class="mb-2"><i class="bi bi-geo-alt-fill" style="color: var(--green-primary); font-size: 24px;"></i></div>
+                            <div>${city}</div>
+                            <small class="text-muted">${count} ${getWordForm(count, ['завод', 'завода', 'заводов'])}</small>
+                        </div>
+                    </div>
+                `;
+                citiesContainer.innerHTML += cityCard;
+            });
+        }
+        
+        // Генерация ссылки в каталоге
+        function generateCatalogLinks(products) {
+            const linksContainer = document.getElementById('catalogLinks');
+            if (!linksContainer) return;
+            
+            linksContainer.innerHTML = '';
+            
+            const types = [...new Set(products.map(p => p.type).filter(type => type))];
+            
+            types.forEach(type => {
+                const count = products.filter(p => p.type === type).length;
+                const link = document.createElement('li');
+                link.innerHTML = `<a href="#" onclick="filterByType('${type}')">${type} (${count})</a>`;
+                linksContainer.appendChild(link);
+            });
+        }
+        
+        // Обновление статистики данных в подвале
+        function updateDataStats() {
+            const activeProducts = allProducts.filter(product => 
+                product.status === 'active' || product.status === undefined
+            ).length;
+            
+            const activeManufacturers = allManufacturers.filter(manufacturer => 
+                manufacturer.status === 'active' || manufacturer.status === undefined
+            ).length;
+            
+            const dataStatsElement = document.getElementById('dataStats');
+            if (dataStatsElement) {
+                dataStatsElement.textContent = 
+                    `Загружено ${activeProducts} товаров от ${activeManufacturers} производителей`;
+            }
+        }
+        
+        // Обновление времени последнего обновления
+        function updateLastUpdateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('ru-RU', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+            
+            const lastUpdateElement = document.getElementById('lastUpdate');
+            if (lastUpdateElement) {
+                lastUpdateElement.textContent = `сегодня ${timeString}`;
+            }
+            lastUpdateTime = now;
+        }
+        
+        // Показать детали товара
+        function showProductDetail(productId) {
+            const product = allProducts.find(p => p.id === productId);
+            const manufacturer = allManufacturers.find(m => m.id === product.manufacturer_id);
+            
+            if (!product) return;
+            
+            document.getElementById('productDetailTitle').textContent = product.name;
+            
+            const detailBody = document.getElementById('productDetailBody');
+            detailBody.innerHTML = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <h6>Технические характеристики:</h6>
+                            <p>${product.specs || 'Не указаны'}</p>
+                        </div>
+                        <div class="mb-3">
+                            <h6>Тип:</h6>
+                            <p>${product.type || 'Не указан'}</p>
+                        </div>
+                        <div class="mb-3">
+                            <h6>Цена:</h6>
+                            <h4 class="text-green-primary">${formatCurrency(product.price)}/${product.unit || 'м'}</h4>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <h6>Производитель:</h6>
+                            <p>${manufacturer ? manufacturer.name : 'Не указан'}</p>
+                            ${manufacturer ? `
+                                <p><small class="text-muted">${manufacturer.city || ''}</small></p>
+                                ${manufacturer.email ? `<p><small>Email: ${manufacturer.email}</small></p>` : ''}
+                                ${manufacturer.phone ? `<p><small>Телефон: ${manufacturer.phone}</small></p>` : ''}
+                            ` : ''}
+                        </div>
+                        <div class="mb-3">
+                            <h6>Статус:</h6>
+                            <span class="badge ${product.status === 'active' ? 'bg-success' : 'bg-secondary'}">
+                                ${product.status === 'active' ? 'В наличии' : 'Недоступен'}
+                            </span>
+                        </div>
+                        <div class="mb-3">
+                            <h6>Дата добавления:</h6>
+                            <p>${formatDate(product.created_at)}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            const modal = new bootstrap.Modal(document.getElementById('productDetailModal'));
+            modal.show();
+        }
+        
+        // Показать статус данных
+        function showDataStatus() {
+            const activeProducts = allProducts.filter(product => 
+                product.status === 'active' || product.status === undefined
+            ).length;
+            
+            const activeManufacturers = allManufacturers.filter(manufacturer => 
+                manufacturer.status === 'active' || manufacturer.status === undefined
+            ).length;
+            
+            document.getElementById('modalProductsCount').textContent = allProducts.length;
+            document.getElementById('modalManufacturersCount').textContent = allManufacturers.length;
+            document.getElementById('modalActiveProducts').textContent = activeProducts;
+            document.getElementById('modalLastUpdate').textContent = 
+                lastUpdateTime ? lastUpdateTime.toLocaleTimeString('ru-RU') : '-';
+            
+            const modal = new bootstrap.Modal(document.getElementById('dataStatusModal'));
+            modal.show();
+        }
+        
+        // Обновить данные
+        function refreshData() {
+            showNotification('Обновление данных...', 'info');
+            
+            // Имитация загрузки новых данных
+            setTimeout(() => {
+                loadData();
+                updateLastUpdateTime();
+                showNotification('Данные успешно обновлены!', 'success');
+            }, 1000);
+        }
+        
+        // Проверка обновлений
+        function checkForUpdates() {
+            // Здесь можно добавить логику проверки изменений в localStorage
+            console.log('Проверка обновлений данных...');
+        }
+        
+        // Скачать прайс-лист
+        function downloadPriceList() {
+            const activeProducts = allProducts.filter(product => 
+                product.status === 'active' || product.status === undefined
+            );
+            
+            if (activeProducts.length === 0) {
+                showNotification('Нет товаров для экспорта', 'warning');
+                return;
+            }
+            
+            // Формируем CSV
+            let csv = 'Название;Тип;Цена;Единица;Производитель\n';
+            
+            activeProducts.forEach(product => {
+                const manufacturer = allManufacturers.find(m => m.id === product.manufacturer_id);
+                csv += `"${product.name}";"${product.type || ''}";${product.price};"${product.unit || 'м'}";"${manufacturer ? manufacturer.name : ''}"\n`;
+            });
+            
+            // Создаем и скачиваем файл
+            const blob = new Blob(['\ufeff', csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.setAttribute('href', url);
+            link.setAttribute('download', `Прайс-лист_${new Date().toISOString().slice(0,10)}.csv`);
+            link.click();
+            
+            showNotification('Прайс-лист успешно скачан!', 'success');
+        }
+        
+        // Запрос цены
+        function requestPrice() {
+            showNotification('Запрос цены отправлен производителю!', 'success');
+            bootstrap.Modal.getInstance(document.getElementById('productDetailModal')).hide();
+        }
+        
+        // Вспомогательные функции
+        
+        // Показать/скрыть лоадер
+        function showLoader(loaderId, show) {
+            const loader = document.getElementById(loaderId);
+            if (loader) {
+                if (show) {
+                    loader.classList.add('active');
+                } else {
+                    loader.classList.remove('active');
+                }
+            }
+        }
+        
+        // Показать уведомление
+        function showNotification(message, type = 'info') {
+            const notificationArea = document.getElementById('notificationArea');
+            const alertClass = {
+                'success': 'alert-success',
+                'error': 'alert-danger',
+                'warning': 'alert-warning',
+                'info': 'alert-info'
+            }[type] || 'alert-info';
+            
+            const notification = document.createElement('div');
+            notification.className = `alert ${alertClass} alert-dismissible fade show alert-notification`;
+            notification.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+            `;
+            
+            notificationArea.appendChild(notification);
+            
+            // Автоматически удалить уведомление через 5 секунд
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 5000);
+        }
+        
+        // Форматирование валюты
+        function formatCurrency(amount) {
+            if (!amount && amount !== 0) return '0 руб.';
+            return new Intl.NumberFormat('ru-RU', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(amount) + ' руб.';
+        }
+        
+        // Форматирование даты
+        function formatDate(dateString) {
+            if (!dateString) return 'Не указана';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('ru-RU');
+        }
+        
+        // Получение иконки для типа товара
+        function getProductIcon(type) {
+            const icons = {
+                'Силовой': 'bi bi-lightning-fill',
+                'Оптический': 'bi bi-wifi',
+                'Витая пара': 'bi bi-hdd-network',
+                'Коаксиальный': 'bi bi-tv',
+                'СИП': 'bi bi-lightning-charge',
+                'Контрольный': 'bi bi-speedometer',
+                'Температурный': 'bi bi-thermometer'
+            };
+            
+            return icons[type] || 'bi bi-box-seam';
+        }
+        
+        // Получение правильной формы слова
+        function getWordForm(number, forms) {
+            number = Math.abs(number) % 100;
+            const remainder = number % 10;
+            
+            if (number > 10 && number < 20) return forms[2];
+            if (remainder > 1 && remainder < 5) return forms[1];
+            if (remainder === 1) return forms[0];
+            return forms[2];
+        }
+        
+        // Функции для показа информации
+        function loadAboutSection() {
+            document.getElementById('about').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function showDeliveryInfo() {
+            showNotification('Информация о доставке: доставка по России 3-7 дней. Самовывоз со склада в Москве.', 'info');
+        }
+        
+        function showPaymentInfo() {
+            showNotification('Способы оплаты: наличные, банковская карта, безналичный расчет для юридических лиц.', 'info');
+        }
+        
+        // Экспорт данных для админ-панели
+        window.getSiteData = function() {
+            return {
+                products: allProducts,
+                manufacturers: allManufacturers,
+                lastUpdate: lastUpdateTime,
+                stats: {
+                    totalProducts: allProducts.length,
+                    activeProducts: allProducts.filter(p => p.status === 'active' || p.status === undefined).length,
+                    totalManufacturers: allManufacturers.length,
+                    activeManufacturers: allManufacturers.filter(m => m.status === 'active' || m.status === undefined).length
+                }
+            };
+        };
+        
+        // Функция для обновления данных из админ-панели
+        window.updateFromAdmin = function(products, manufacturers) {
+            allProducts = products;
+            allManufacturers = manufacturers;
+            
+            // Сохраняем в localStorage
+            localStorage.setItem(PRODUCTS_KEY, JSON.stringify(products));
+            localStorage.setItem(MANUFACTURERS_KEY, JSON.stringify(manufacturers));
+            
+            // Обновляем отображение
+            loadData();
+            updateLastUpdateTime();
+            
+            showNotification('Данные успешно обновлены из админ-панели!', 'success');
+            
+            return true;
+        };
+    </script>
+</body>
+</html>
